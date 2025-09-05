@@ -17,7 +17,7 @@ const SignUp = () => {
         </p>
 
    
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-4" /*onSubmit=(then ask for otp sent on their email)*/>
           <div>
             <input
               type="text"
