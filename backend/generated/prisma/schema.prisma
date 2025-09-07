@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleType {
+  SUPERADMIN
+  ADMIN
+  STUDENT
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String   @unique
+  password  String
+  roleId    String   @db.Uuid
+  role      Role     @relation(fields: [roleId], references: [id])
+  form      Form?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id        String   @id @default(uuid()) @db.Uuid
+  role      RoleType @unique
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Form {
+  id        String     @id @default(uuid()) @db.Uuid
+  userId    String     @unique @db.Uuid
+  user      User       @relation(fields: [userId], references: [id])
+  question  Question[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Question {
+  id        String   @id @default(uuid()) @db.Uuid
+  form      Form     @relation(fields: [formId], references: [id])
+  formId    String   @db.Uuid
+  question  String   @unique
+  required  Boolean  @default(true)
+  answer    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
