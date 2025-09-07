@@ -8,22 +8,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum RoleType {
-  SUPERADMIN
-  ADMIN
-  STUDENT
-}
-
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  email     String   @unique
-  password  String
-  roleId    String   @db.Uuid
-  role      Role     @relation(fields: [roleId], references: [id])
-  form      Form?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  email       String        @unique
+  password    String
+  roleId      String        @db.Uuid
+  role        Role          @relation(fields: [roleId], references: [id])
+  form        Form?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  emailIssued EmailIssued[]
 }
 
 model Role {
@@ -35,12 +30,24 @@ model Role {
 }
 
 model Form {
-  id        String     @id @default(uuid()) @db.Uuid
-  userId    String     @unique @db.Uuid
-  user      User       @relation(fields: [userId], references: [id])
-  question  Question[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @unique @db.Uuid
+  user        User          @relation(fields: [userId], references: [id])
+  question    Question[]
+  status      Status        @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  emailIssued EmailIssued[]
+}
+
+model EmailIssued {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  formId    String   @db.Uuid
+  form      Form     @relation(fields: [formId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Question {
@@ -52,4 +59,16 @@ model Question {
   answer    String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum RoleType {
+  SUPERADMIN
+  ADMIN
+  STUDENT
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
 }
