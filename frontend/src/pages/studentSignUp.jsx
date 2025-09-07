@@ -1,5 +1,6 @@
 //SignUp page for Students Only
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const SignUp = () => {
   return (
@@ -7,8 +8,11 @@ const SignUp = () => {
         <div className="flex items-center justify-center bg-gradient-to-b from-green-200 to-pink-200 h-screen w-screen rounded-xl">
 
       <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white p-8 shadow-lg">
-
-    
+        <div className="text-center mb-4">
+          <Link to="/" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            ← Back to Home
+          </Link>
+        </div>
         <h2 className="text-center text-2xl font-semibold text-gray-800 mb-2">
           Sign up with college details
         </h2>
