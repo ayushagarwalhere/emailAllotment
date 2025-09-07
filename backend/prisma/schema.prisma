@@ -33,7 +33,8 @@ model User {
   name       String
   email      String   @unique
   password   String
-  roleId     String
+  branch     Branch
+  roleId     String   @db.Uuid
   role       Role     @relation(fields: [roleId], references: [id])
   form       Form?
   createdAt  DateTime @default(now())
@@ -49,13 +50,22 @@ model Role {
 }
 
 model Form {
+  id         String     @id @default(uuid()) @db.Uuid
+  userId     String     @unique @db.Uuid 
+  user       User       @relation(fields: [userId], references: [id])
+  question   Question[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Question{
   id         String   @id @default(uuid()) @db.Uuid
   name       String
   email      String   @unique
   branch     Branch
   address    String
-  userId     String   @unique @db.Uuid 
-  user       User     @relation(fields: [userId], references: [id])
+  formId     String   @db.Uuid
+  form       Form     @relation(fields: [formId], references: [id])
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
