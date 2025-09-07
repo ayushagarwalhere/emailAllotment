@@ -1,0 +1,41 @@
+  # Node modules
+backend/node_modules/
+frontend/node_modules/
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+frontend/build/
+backend/dist/
+
+# Env files
+.env
+**/.env
+
+# Prisma generated client
+backend/generated/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# MacOS
+.DS_Store
+
+# Editor directories
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Misc
+coverage/
+.cache/
+*.bak
+*.tmp
+

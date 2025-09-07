@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(uuid()) @db.Uuid
+  name          String
+  email         String        @unique
+  password      String
+  roleId        String        @db.Uuid
+  role          Role          @relation(fields: [roleId], references: [id])
+  form          Form?
+  refreshToken  RefreshToken?
+  emailVerified Boolean       @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RefreshToken {
+  id     String @id @default(uuid()) @db.Uuid
+  token  String @unique
+  userId String @unique @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Role {
+  id    String   @id @default(uuid()) @db.Uuid
+  role  RoleType @unique
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Form {
+  id       String     @id @default(uuid()) @db.Uuid
+  userId   String     @unique @db.Uuid
+  user     User       @relation(fields: [userId], references: [id])
+  question Question[]
+  status   Status     @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Question {
+  id       String  @id @default(uuid()) @db.Uuid
+  formId   String  @db.Uuid
+  form     Form    @relation(fields: [formId], references: [id])
+  question String  @unique
+  required Boolean @default(true)
+  answer   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum RoleType {
+  SUPERADMIN
+  ADMIN
+  STUDENT
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+}
