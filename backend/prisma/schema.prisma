@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -13,6 +12,7 @@ model User {
   name          String
   email         String        @unique
   password      String
+  branch        Branch
   roleId        String        @db.Uuid
   role          Role          @relation(fields: [roleId], references: [id])
   form          Form?
@@ -70,6 +70,20 @@ enum RoleType {
   SUPERADMIN
   ADMIN
   STUDENT
+}
+
+enum Branch {
+  CS
+  DCS
+  EC
+  DEC
+  ME
+  EE
+  MS
+  MNC
+  EP
+  CH
+  CE
 }
 
 enum Status {
