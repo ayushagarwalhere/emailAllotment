@@ -1,8 +1,38 @@
 //SignUp page for Students Only
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 const SignUp = () => {
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState({
+    name: '',
+    collegeEmail: '',
+    rollNumber: '',
+    branch: '',
+    password: ''
+  })
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    
+    // Store student data in localStorage for now (in real app, this would go to backend)
+    localStorage.setItem('studentData', JSON.stringify(formData))
+    
+    // Show OTP verification message (you can implement actual OTP later)
+    alert('OTP sent to your email! Please check your inbox.')
+    
+    // Redirect to student dashboard
+    navigate('/student-dashboard')
+  }
+
   return (
     <div>
         <div className="flex items-center justify-center bg-gradient-to-b from-green-200 to-pink-200 h-screen w-screen rounded-xl">
@@ -21,12 +51,14 @@ const SignUp = () => {
         </p>
 
    
-        <form className="space-y-4" /*onSubmit=(then ask for otp sent on their email and redirect to studentDashboard page)*/>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <input
               type="text"
               placeholder="Full Name"
               name="name"
+              value={formData.name}
+              onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
               required
             />
@@ -36,6 +68,8 @@ const SignUp = () => {
               type="email"
               placeholder="Email ID"
               name="collegeEmail"
+              value={formData.collegeEmail}
+              onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
               required
             />
@@ -45,6 +79,8 @@ const SignUp = () => {
               type="text"
               placeholder="Roll Number"
               name="rollNumber"
+              value={formData.rollNumber}
+              onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
               required
             />
@@ -54,6 +90,8 @@ const SignUp = () => {
               type="text"
               placeholder="Branch (e.g., Computer Science, Electronics)"
               name="branch"
+              value={formData.branch}
+              onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
               required
             />
@@ -63,6 +101,8 @@ const SignUp = () => {
               type="password"
               placeholder="Password"
               name="password"
+              value={formData.password}
+              onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
               required
             />
