@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 export default function AdminDashboard() {
-  // Mock stats data
+  // random data
   const stats = { students: 120, forms: 15, pending: 34, verified: 86 };
 
-  // Mock submissions data
+  // random submissions data
   const [submissions, setSubmissions] = useState([
     {
       id: 1,
@@ -29,7 +29,7 @@ export default function AdminDashboard() {
     },
   ]);
 
-  // Handle verify/reject
+
   const handleAction = (id, action) => {
     setSubmissions((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: action } : s))
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar Stats */}
+
       <div className="w-64 bg-white shadow-lg p-4 space-y-4">
         <h2 className="text-xl font-bold mb-4">Quick Stats</h2>
 
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Main Content */}
+
       <div className="flex-1 p-6">
         <h1 className="text-2xl font-bold mb-6">Pending Submissions</h1>
 

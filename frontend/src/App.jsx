@@ -17,7 +17,7 @@ const App = () => {
           <Route path="/student-dashboard" element={<StudentDashboard />} />
         </Routes>
       </div>
-      <AdminDashboard />
+
     </Router>
   )
 }
