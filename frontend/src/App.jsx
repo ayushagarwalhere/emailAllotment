@@ -4,6 +4,7 @@ import SignUp from './pages/studentSignUp'
 import LogIn from './pages/logIn'
 import LandingPage from './pages/landingPage'
 import StudentDashboard from './pages/studentDashboard'
+import AdminDashboard from './pages/adminDashboard'
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
           <Route path="/student-dashboard" element={<StudentDashboard />} />
         </Routes>
       </div>
+      <AdminDashboard />
     </Router>
   )
 }

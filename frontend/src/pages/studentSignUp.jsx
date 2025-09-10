@@ -23,13 +23,12 @@ const SignUp = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     
-    // Store student data in localStorage for now (in real app, this would go to backend)
+    // Store student data this would go to backend
     localStorage.setItem('studentData', JSON.stringify(formData))
     
-    // Show OTP verification message (you can implement actual OTP later)
+    // Show OTP verification message and also add a input box so that user can enter otp 
     alert('OTP sent to your email! Please check your inbox.')
     
-    // Redirect to student dashboard
     navigate('/student-dashboard')
   }
 
@@ -86,15 +85,27 @@ const SignUp = () => {
             />
           </div>
           <div>
-            <input
-              type="text"
-              placeholder="Branch (e.g., Computer Science, Electronics)"
+            <select
               name="branch"
               value={formData.branch}
               onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 hover:border-black hover:bg-gray-100 transition-colors"
               required
-            />
+            >
+              <option value="" disabled>Select Branch</option>
+              <option value="CSE">Computer Science</option>
+              <option value="ECE">Electronics and Communication</option>
+              <option value="EE">Electrical</option>
+              <option value="ME">Mechanical</option>
+              <option value="DCS">Dual Computer Science</option>
+              <option value="DEC">Dual Electronics & Communication</option>
+              <option value="MNC">Mathematics & Scientific Computing</option>
+              <option value="CE">Civil</option>
+              <option value="CHE">Chemical</option>
+              <option value="MS">Material Science</option>
+              <option value="EP">Engineering Physics</option>
+              <option value="AR">Architecture</option>
+            </select>
           </div>
           <div>
             <input

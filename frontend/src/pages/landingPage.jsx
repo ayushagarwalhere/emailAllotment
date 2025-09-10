@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 
 const LandingPage = () => {
   return (
-    <div className="max-h-screen bg-[#640f12]  overflow-hidden">
-      <nav className="bg-[#02263c] shadow-sm rounded-xl">
+    <div className="max-h-screen bg-gray-900  overflow-hidden">
+      <nav className="bg-gray-900">
         <div className="max-w-7xl mx-auto ">
          <div className="flex justify-between items-center h-24 px-4 sm:px-6 lg:px-8">
           <div className="flex gap-5 items-center h-24 ">
@@ -42,11 +42,11 @@ const LandingPage = () => {
       </div>
 
       <div className="h-2 bg-white"> </div>
-      <div className="bg-gradient-to-b from-[#02263c] to-gray-200 py-20 rounded-xl ">
+      <div className="bg-gradient-to-b from-orange-400 to-gray-200 py-20 rounded-xl ">
 
           <div className="text-center">
-            <h2 className="text-3xl text-gray-200 font-bold ">How It Works</h2>
-            <p className="text-lg text-gray-200">Simple steps to get your email allotment</p>
+            <h2 className="text-3xl text-black font-bold ">How It Works</h2>
+            <p className="text-lg text-black">Simple steps to get your email allotment</p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-10">

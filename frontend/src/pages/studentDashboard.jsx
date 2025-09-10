@@ -12,7 +12,6 @@ const StudentDashboard = () => {
   })
 
   useEffect(() => {
-    // Extract student data from localStorage (set during signup)
     const savedData = localStorage.getItem('studentData')
     if (savedData) {
       const parsedData = JSON.parse(savedData)
@@ -21,26 +20,21 @@ const StudentDashboard = () => {
         email: parsedData.collegeEmail || '',
         rollNumber: parsedData.rollNumber || '',
         branch: parsedData.branch || '',
-        year: '3rd Year', // You can add year field to signup form later
-        semester: '6th Semester' // You can add semester field to signup form later
       })
     }
   }, [])
 
   const handleLogout = () => {
-    // Here you would typically clear authentication tokens and redirect
     console.log('Logging out...')
     // For now, just redirect to home
     window.location.href = '/'
   }
 
   const handleOpenForm = () => {
-    // This will be implemented later when you create the form
-    console.log('Opening form...')
-    alert('Form functionality will be implemented later!')
+    // open the form 
   }
 
-  // Show loading or redirect if no student data
+ 
   if (!studentData.name) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -56,17 +50,16 @@ const StudentDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <nav className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gray-400">
+      <nav className="bg-blue-300 shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">NIT HAMIRPUR</h1>
-              <span className="ml-4 text-sm text-gray-500">Student Portal</span>
+              <h1 className="text-2xl font-bold text-[#640f12]">NIT HAMIRPUR</h1>
+              <span className="ml-4 text-md text-gray-500">Student Portal</span>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome, {studentData.name}</span>
+              <span className="text-lg text-gray-600">Welcome, {studentData.name} !!</span>
               <button
                 onClick={handleLogout}
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100"
@@ -78,10 +71,10 @@ const StudentDashboard = () => {
         </div>
       </nav>
 
-      {/* Main Content */}
+
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Header Section */}
+
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8">
             <h1 className="text-3xl font-bold text-white mb-2">Student Dashboard</h1>
             <p className="text-blue-100">
@@ -89,7 +82,6 @@ const StudentDashboard = () => {
             </p>
           </div>
 
-          {/* Student Information Section */}
           <div className="p-6">
             <div className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6 border-b pb-2">
@@ -120,7 +112,6 @@ const StudentDashboard = () => {
               </div>
             </div>
 
-            {/* Action Section */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <div className="text-center">
                 <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
@@ -144,7 +135,6 @@ const StudentDashboard = () => {
               </div>
             </div>
 
-            {/* Status Section */}
             <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
