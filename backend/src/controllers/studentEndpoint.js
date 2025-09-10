@@ -32,14 +32,14 @@ const status=async (req, res) => {
   try {
     const form = await prisma.form.findUnique({
       where: { userId: req.params.id },
-      select: { status: true }
+      select: { Status: true }
     });
 
     if (!form) {
       return res.status(404).json({ error: "Form not found" });
     }
 
-    res.json({ status: form.status });
+    res.json({ status: form.Status });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -60,9 +60,9 @@ const resubmit=async (req, res) => {
       return res.status(404).json({ error: "No previous form found" });
     }
 
-    if (existingForm.status !== "REJECTED") {
+    if (existingForm.Status !== "REJECTED") {
       return res.status(400).json({ 
-        error: `Cannot resubmit. Current status is ${existingForm.status}` 
+        error: `Cannot resubmit. Current status is ${existingForm.Status}` 
       });
     }
 
