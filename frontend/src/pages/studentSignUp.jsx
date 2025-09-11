@@ -20,17 +20,30 @@ const SignUp = () => {
     }))
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    
-    // Store student data this would go to backend
-    localStorage.setItem('studentData', JSON.stringify(formData))
-    
-    // Show OTP verification message and also add a input box so that user can enter otp 
-    alert('OTP sent to your email! Please check your inbox.')
-    
-    navigate('/student-dashboard')
+const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = {
+        name: formData.name,
+        email: formData.collegeEmail,
+        password: formData.password
+      };
+
+    const result = await signup(data);
+
+    if (result.error) {
+      alert(result.error);
+      return;
+    }
+
+    alert('Signup successful! OTP sent to your email.');
+    navigate('/verify-otp'); // create this route to verify OTP
+  } catch (error) {
+    console.error('Signup error:', error);
+    alert('An error occurred. Please try again.');
   }
+};
 
   return (
     <div>
