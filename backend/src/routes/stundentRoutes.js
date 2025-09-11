@@ -1,6 +1,6 @@
 import express from 'express'
 const router = express.Router();
-import {register,submitForm,status,resubmit} from '../controllers/studentEndpoint.js'
+import {submitForm,status,resubmit} from '../controllers/studentEndpoint.js'
 
 
 // Form Submission
