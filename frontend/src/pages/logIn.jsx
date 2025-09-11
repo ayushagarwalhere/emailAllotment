@@ -1,6 +1,6 @@
 //Login page for students and CC
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React from "react";
+import { Link } from "react-router-dom";
 
 const LogIn = () => {
   return (
@@ -8,7 +8,10 @@ const LogIn = () => {
       <div className="flex items-center justify-center bg-gradient-to-b from-blue-200 to-red-200 h-screen w-screen rounded-xl">
         <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white p-8 shadow-lg">
           <div className="text-center mb-4">
-            <Link to="/" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            <Link
+              to="/"
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
               ← Back to Home
             </Link>
           </div>
@@ -19,7 +22,9 @@ const LogIn = () => {
             Enter your email and password to continue.
           </p>
 
-          <form className="space-y-4" /*onSubmit=(then ask for otp sent on their email-id for students and CC too and redirect to their Dashboard based on their role)*/>
+          <form
+            className="space-y-4" /*onSubmit=(then ask for otp sent on their email-id for students and CC too and redirect to their Dashboard based on their role)*/
+          >
             <div>
               <input
                 type="email"
@@ -38,7 +43,7 @@ const LogIn = () => {
                 required
               />
             </div>
-            
+
             <button
               type="submit"
               className="w-full rounded-lg bg-black text-white py-2 font-medium hover:bg-gray-800 transition"
@@ -46,11 +51,11 @@ const LogIn = () => {
               Login
             </button>
           </form>
-
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LogIn
+export default LogIn;
+
