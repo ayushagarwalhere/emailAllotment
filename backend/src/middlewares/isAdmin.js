@@ -8,7 +8,9 @@ const IsAdmin = async (req, res, next) => {
             return res.status(401).json({ message: "Unauthorized"});
         }
         const user = await prisma.user.findUnique({
-            where: { email: userData.email },
+            where: { 
+                id : userData.id,
+             },
             select: { role: true }
         });
         if (!user) {

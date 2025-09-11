@@ -45,10 +45,12 @@ model Role {
 
 model Form {
   id       String     @id @default(uuid()) @db.Uuid
+  formName String
   userId   String     @unique @db.Uuid
   user     User       @relation(fields: [userId], references: [id])
   question Question[]
   status   Status     @default(PENDING)
+  isLive   Boolean    @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
