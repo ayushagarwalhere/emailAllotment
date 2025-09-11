@@ -1,11 +1,10 @@
-import express from 'express';
-import { signup, login, verifyOtp } from './controller.js';
-import { validateSignup, validateLogin, validateVerifyOtp } from './validator.js';
+import express from "express";
+import { signup, login, verifyOtp } from "../../controller/auth.js";
 
 const router = express.Router();
 
-router.post('/signup', validateSignup, signup);
-router.post('/login', validateLogin, login);
-router.post('/verify-otp', validateVerifyOtp, verifyOtp);
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/verify-otp", verifyOtp);
 
 export default router;

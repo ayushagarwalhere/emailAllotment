@@ -1,0 +1,14 @@
+{
+	"devDependencies": {
+		"eslint": "^9.35.0",
+		"husky": "^8.0.0",
+		"lint-staged": "^16.1.6",
+		"prettier": "^3.6.2"
+	},
+	"scripts": {
+		"prepare": "husky install"
+	},
+	"dependencies": {
+		"zod": "^4.1.7"
+	}
+}
