@@ -89,4 +89,4 @@ const resubmit=async (req, res) => {
   }
 };
 
-export{register,submitForm,status,resubmit}
+export{submitForm,status,resubmit}
