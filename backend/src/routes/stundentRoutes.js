@@ -1,21 +1,22 @@
 import express from 'express'
 const router = express.Router();
-import {submitForm,status,resubmit} from '../controllers/studentEndpoint.js'
+import {submitForm,status,resubmit} from '../controllers/studentEndpoint.js';
+import IsStudent from '../middlewares/isStudent.js';
 
 
 // Form Submission
 // POST /students/:id/form
-router.post("/:id/form", submitForm);
+router.post("/:id/submit",IsStudent, submitForm);
 
 
 // Status
 // GET /students/:id/status
-router.get("/:id/status", status);
+router.get("/:id/status",IsStudent, status);
 
 
- //Resubmit in case of deletion
-// POST /students/:id/form/resubmit
-router.post("/:id/form/resubmit", resubmit);
+// PUT /students/:id/form/resubmit
+router.put("/:id/form/resubmit", IsStudent, resubmit);
+
 
 
 export default router;
