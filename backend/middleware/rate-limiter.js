@@ -1,7 +1,6 @@
-import Redis from "ioredis";
+import "dotenv/config";
 import { RateLimiterRedis } from "rate-limiter-flexible";
-
-const redisClient = new Redis({ enableOfflineQueue: false });
+import { redisClient } from "../config/db.js";
 
 const rateLimiterRedis = new RateLimiterRedis({
   storeClient: redisClient,
