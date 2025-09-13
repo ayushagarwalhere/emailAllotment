@@ -27,6 +27,7 @@ const getUser = async(req,res)=>{
 
 const approveUser = async(req,res)=>{
     const userId = req.params.id;
+    
     if(!userId){
         return res.status(400).json({message : "Invalid user ID"})
     }
