@@ -10,14 +10,18 @@ datasource db {
 model User {
   id            String        @id @default(uuid()) @db.Uuid
   name          String
+  middleName    String?
+  lastName      String?
   email         String        @unique
   password      String
   branch        Branch
   roleId        String        @db.Uuid
   role          Role          @relation(fields: [roleId], references: [id])
   form          Form?
+  submission    Submission?
   refreshToken  RefreshToken?
   emailVerified Boolean       @default(false)
+  status        Status        @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -45,10 +49,12 @@ model Role {
 
 model Form {
   id       String     @id @default(uuid()) @db.Uuid
+  formName String
   userId   String     @unique @db.Uuid
   user     User       @relation(fields: [userId], references: [id])
   question Question[]
-  status   Status     @default(PENDING)
+  submission Submission[]
+  shareId  String? @default(uuid())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -58,9 +64,45 @@ model Question {
   id       String  @id @default(uuid()) @db.Uuid
   formId   String  @db.Uuid
   form     Form    @relation(fields: [formId], references: [id])
-  question String  @unique
+  question String  
+  options  Option[]
   required Boolean @default(true)
-  answer   String?
+  type     Type
+  answer   Answer[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Option {
+  id String @id @default(uuid()) @db.Uuid
+  questionId String @db.Uuid
+  question Question @relation(fields: [questionId],references: [id])
+  option String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Submission{
+  id String @id @default(uuid()) @db.Uuid
+  userId   String     @unique @db.Uuid
+  user     User       @relation(fields: [userId], references: [id])
+  form     Form       @relation(fields: [formId], references: [id])
+  formId   String     @db.Uuid
+  answer   Answer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Answer{
+  id String @id @default(uuid()) @db.Uuid
+  questionId String @db.Uuid
+  question Question @relation(fields: [questionId], references: [id])
+  submissionId String @db.Uuid
+  submission Submission @relation(fields: [submissionId], references: [id])
+  response String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -90,4 +132,11 @@ enum Status {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum Type {
+  TEXT
+  MCQ
+  NUMBER
+  EMAIL
 }

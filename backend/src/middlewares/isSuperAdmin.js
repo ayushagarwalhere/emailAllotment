@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { RoleType } from "@prisma/client";
 
-const isAdmin = (req, res, next) => {
+const isSuperAdmin = (req, res, next) => {
     const authHeader = req.headers.authorization;
     
     if (!authHeader) {
@@ -12,8 +12,8 @@ const isAdmin = (req, res, next) => {
         return res.status(401).json({ message: "Token missing" });
     }
     try {
-        const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        if (decoded && decoded.role === RoleType.ADMIN) {
+        const decoded = jwt.verify(token, process.env.SUPERADMIN_SECRET_KEY);
+        if (decoded && decoded.role === RoleType.SUPERADMIN) {
             req.user = decoded; 
             return next();
         } else {
@@ -24,4 +24,4 @@ const isAdmin = (req, res, next) => {
     }
 };
 
-export default isAdmin;
+export default isSuperAdmin;
