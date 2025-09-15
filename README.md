@@ -69,7 +69,7 @@ project-root/
 Ensure the following tools are installed on your system:
 
 ✔ [Node.js](https://nodejs.org/en/) (v16 or later)  
-✔ [npm](https://www.npmjs.com/get-npm) 
+✔ [npm](https://www.npmjs.com/get-npm)                                                                                                                                                                                                       
 ✔ [PostgreSQL](https://www.postgresql.org/download/)  
 ✔ [Redis](https://redis.io/docs/getting-started/installation/)  
 ✔ A code editor like [VS Code](https://code.visualstudio.com/)
@@ -84,20 +84,20 @@ git clone https://github.com/ayushagarwalhere/emailAllotment.git
 cd emailAllotment
 
 ### SETUP BACKEND -
-cd backend
-npm install
-create a .env file
-update .env with your database and credentials
+cd backend        
+npm install        
+create a .env file       
+update .env with your database and credentials        
 generate prisma client -> npx prisma generate
-                          npx prisma migrate dev --name init
+                          npx prisma migrate dev --name init         
 npm start   
-
-### SETUP FRONTEND -
-cd ../frontend
-npm install
-create a .env file
-update .env file with your credentials
-npm run dev
+                                                              
+### SETUP FRONTEND - 
+cd ../frontend        
+npm install         
+create a .env file         
+update .env file with your credentials          
+npm run dev           
 
 ---
                           
