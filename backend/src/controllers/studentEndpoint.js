@@ -5,107 +5,102 @@ import { Status } from '@prisma/client';
 //  Student Form Submission
 const submitForm = async (req, res) => {
   try {
-    const { questions } = req.body;
-    const userId = req.cookies.userId;   
+    const { formId, answers } = req.body; 
+    const userId = req.cookies.userId;
 
-    if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
+    if (!userId) return res.status(401).json({ error: "User not authenticated" });
+
+    const existingSubmission = await prisma.submission.findUnique({
+      where: { userId }
+    });
+    if (existingSubmission) {
+      return res.status(400).json({ error: "You have already submitted the form" });
     }
 
-    const form = await prisma.form.create({
+    const submission = await prisma.submission.create({
       data: {
         userId,
-        question: {
-          create: questions.map(q => ({
-            question: q.question,
-            answer: q.answer
+        formId,
+        answer: {
+          create: answers.map(a => ({
+            questionId: a.questionId,
+            response: a.response
           }))
         }
       },
-      include: { question: true }
+      include: { answer: true }
     });
 
-    res.status(201).json({ message: "Form submitted successfully", form });
+    await prisma.user.update({
+      where: { id: userId },
+      data: { status: Status.PENDING }
+    });
+
+    res.status(201).json({ message: "Form submitted successfully", submission });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
 
-//  Get Student Status
+// Get Student Status
 const status = async (req, res) => {
   try {
-    const userId = req.cookies.userId;   
+    const userId = req.cookies.userId;
+    if (!userId) return res.status(401).json({ error: "User not authenticated" });
 
-    if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
-    }
-
-    const form = await prisma.form.findUnique({
-      where: { userId },
-      select: { status: true }   
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { status: true }
     });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (!form) {
-      return res.status(404).json({ error: "Form not found" });
-    }
-
-    res.json({ status: form.status });
+    res.json({ status: user.status });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-
 //  Resubmit Form (if rejected)
 const resubmit = async (req, res) => {
   try {
-    const { questions } = req.body;
-    const userId = req.cookies.userId;   
+    const { formId, answers } = req.body;
+    const userId = req.cookies.userId;
 
-    if (!userId) {
-      return res.status(401).json({ error: "User not authenticated" });
-    }
+    if (!userId) return res.status(401).json({ error: "User not authenticated" });
 
-    const existingForm = await prisma.form.findUnique({
-      where: { userId },
-      include: { question: true }
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { status: true }
     });
+    if (!user) return res.status(404).json({ error: "User not found" });
 
-    if (!existingForm) {
-      return res.status(404).json({ error: "No previous form found" });
+    if (user.status !== "REJECTED") {
+      return res.status(400).json({ error: `Cannot resubmit. Current status is ${user.status}` });
     }
 
-    if (existingForm.status !== "REJECTED") {
-      return res.status(400).json({
-        error: `Cannot resubmit. Current status is ${existingForm.status}`
-      });
-    }
+    await prisma.submission.delete({ where: { userId } });
 
-    // Deleting old questions linked to this form
-    await prisma.question.deleteMany({
-      where: { formId: existingForm.id }
-    });
-
-    // Update form with new questions and reset status 
-    const updatedForm = await prisma.form.update({
-      where: { id: existingForm.id },
+    const newSubmission = await prisma.submission.create({
       data: {
-        status: "PENDING",
-        question: {
-          create: questions.map(q => ({
-            question: q.question,
-            answer: q.answer
+        userId,
+        formId,
+        answer: {
+          create: answers.map(a => ({
+            questionId: a.questionId,
+            response: a.response
           }))
         }
       },
-      include: { question: true }
+      include: { answer: true }
     });
 
-    res.status(200).json({
-      message: "Form resubmitted successfully",
-      updatedForm
+    await prisma.user.update({
+      where: { id: userId },
+      data: { status: Status.PENDING }
     });
+
+    res.status(200).json({ message: "Form resubmitted successfully", newSubmission });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

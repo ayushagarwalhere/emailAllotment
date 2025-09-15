@@ -9,8 +9,10 @@ dotenv.config();
 
 let PORT = process.env.PORT || 5001 ;
 
-app.use('/admin', routes);
-app.use('/students', studentRoutes);
+app.use(express.json());  
+app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/students", studentRoutes);
+
 
 app.listen(PORT, ()=>{
     console.log(`The server is running at http://localhost:${PORT}`);

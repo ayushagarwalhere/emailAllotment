@@ -1,22 +1,20 @@
-import express from 'express'
+import express from "express";
 const router = express.Router();
-import {submitForm,status,resubmit} from '../controllers/studentEndpoint.js';
-import IsStudent from '../middlewares/isStudent.js';
+import { submitForm, status, resubmit } from "../controllers/studentEndpoint.js";
+import IsStudent from "../middlewares/isStudent.js";
 
+// Base path  /api/v1/students
 
 // Form Submission
-// POST /students/:id/form
-router.post("/:id/submit",IsStudent, submitForm);
-
+// POST /api/v1/students/submit
+router.post("/submit", IsStudent, submitForm);
 
 // Status
-// GET /students/:id/status
-router.get("/:id/status",IsStudent, status);
+// GET /api/v1/students/status
+router.get("/status", IsStudent, status);
 
-
-// PUT /students/:id/form/resubmit
-router.put("/:id/form/resubmit", IsStudent, resubmit);
-
-
+// Resubmit Form (if rejected)
+// PUT /api/v1/students/resubmit
+router.put("/resubmit", IsStudent, resubmit);
 
 export default router;
