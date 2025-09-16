@@ -79,11 +79,24 @@ const resubmit = async (req, res) => {
       return res.status(400).json({ error: `Cannot resubmit. Current status is ${user.status}` });
     }
 
-    await prisma.submission.delete({ where: { userId } });
+    //  Find the existing submission
+    const existingSubmission = await prisma.submission.findUnique({
+      where: { userId },
+      include: { answer: true }
+    });
+    if (!existingSubmission) {
+      return res.status(404).json({ error: "No previous submission found" });
+    }
 
-    const newSubmission = await prisma.submission.create({
+    //  Delete old answers and keep submission
+    await prisma.answer.deleteMany({
+      where: { submissionId: existingSubmission.id }
+    });
+
+    // Update submission with new answers
+    const updatedSubmission = await prisma.submission.update({
+      where: { id: existingSubmission.id },
       data: {
-        userId,
         formId,
         answer: {
           create: answers.map(a => ({
@@ -95,12 +108,17 @@ const resubmit = async (req, res) => {
       include: { answer: true }
     });
 
+    // Reset user status back to PENDING
     await prisma.user.update({
       where: { id: userId },
       data: { status: Status.PENDING }
     });
 
-    res.status(200).json({ message: "Form resubmitted successfully", newSubmission });
+    res.status(200).json({ 
+      message: "Form resubmitted successfully", 
+      updatedSubmission 
+    });
+
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
