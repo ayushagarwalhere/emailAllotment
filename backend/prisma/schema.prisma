@@ -19,7 +19,7 @@ model User {
   role          Role          @relation(fields: [roleId], references: [id])
   form          Form?
   submission    Submission?
-  refreshToken  RefreshToken?
+  refreshToken  RefreshToken[]
   emailVerified Boolean       @default(false)
   status        Status        @default(PENDING)
 

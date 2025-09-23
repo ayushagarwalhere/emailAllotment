@@ -57,7 +57,7 @@ const verifyEmail = async(req,res)=>{
         if(!user){
             return res.status(404).json({message : "User not found"})
         }
-        if(user.Status !== Status.APPROVED){
+        if(user.status !== Status.APPROVED){
             return res.status(400).json({message : "Email is not approved yet"})
         }
         const updatedUser = await prisma.user.update({
