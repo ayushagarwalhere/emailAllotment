@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { RateLimiterRedis } from "rate-limiter-flexible";
 import { redisClient } from "../config/db.js";
 
