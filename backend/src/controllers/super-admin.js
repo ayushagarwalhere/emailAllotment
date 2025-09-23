@@ -29,7 +29,7 @@ const getAllAdmins = async (req, res) => {
 
 const createAdmin = async (req, res) => {
     const { name,middlename, lastname, branch, email, password } = req.body;
-    if (!email || !password) {
+    if (!email || !password || !name ||!branch) {
         return res.status(400).json({ message: "Name, Email, Password, Branch fields are required" });
     }
     try {

@@ -1,7 +1,7 @@
 import prisma from '../config/prismaClient.js';
 import { RoleType } from '@prisma/client';
 
-const isSuperAdmin = async (req, res, next) => {
+const IsStudent = async (req, res, next) => {
   try {
     const userData = req.user;
     if (!userData || !userData.email) {
@@ -18,10 +18,10 @@ const isSuperAdmin = async (req, res, next) => {
       return res.status(401).json({ message: "User not found" });
     }
 
-    if (user.role.role === RoleType.SUPERADMIN) {
+    if (user.role.role === RoleType.STUDENT) {
       return next();
     } else {
-      return res.status(403).json({ message: "Access denied: SuperAdmin only" });
+      return res.status(403).json({ message: "Access denied: Students only" });
     }
   } catch (error) {
     console.error("An error occurred", error);
@@ -29,4 +29,4 @@ const isSuperAdmin = async (req, res, next) => {
   }
 };
 
-export default isSuperAdmin;
+export default IsStudent;

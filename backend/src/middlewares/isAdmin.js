@@ -1,27 +1,31 @@
-import jwt from "jsonwebtoken";
-import { RoleType } from "@prisma/client";
+import prisma from '../config/prismaClient.js';
+import { RoleType } from '@prisma/client';
 
-const isAdmin = (req, res, next) => {
-    const authHeader = req.headers.authorization;
+const isAdmin = async (req, res, next) => {
+  try {
+    const userData = req.user;
+    if (!userData || !userData.email) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     
-    if (!authHeader) {
-        return res.status(401).json({ message: "Authorization header missing" });
+    const user = await prisma.user.findUnique({
+      where: { email: userData.email },
+      include: { role: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
     }
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ message: "Token missing" });
+
+    if (user.role.role === RoleType.ADMIN) {
+      return next();
+    } else {
+      return res.status(403).json({ message: "Access denied: Admin only" });
     }
-    try {
-        const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        if (decoded && decoded.role === RoleType.ADMIN) {
-            req.user = decoded; 
-            return next();
-        } else {
-            return res.status(403).json({ message: "Access denied: Admins only" });
-        }
-    } catch (err) {
-        return res.status(401).json({ message: "Invalid or expired token" });
-    }
+  } catch (error) {
+    console.error("An error occurred", error);
+    return res.status(500).json({ message: "Some error occurred" });
+  }
 };
 
 export default isAdmin;
