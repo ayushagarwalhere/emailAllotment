@@ -1,13 +1,12 @@
 import prisma from '../config/prismaClient.js';
 import { Status } from '@prisma/client';
+import { questionSchema, validBranch, validUuid } from '../zod-schema/form.js';
 
 //User-route controllers
 const getUser = async(req,res)=>{
-    const userBranch = req.user.branch;
     try {
         const users = await prisma.user.findMany({
             where :{
-                branch : userBranch,
                 emailVerified : false,
                 status: {
                     in: [Status.PENDING, Status.REJECTED]
@@ -26,14 +25,16 @@ const getUser = async(req,res)=>{
 }
 
 const approveUser = async(req,res)=>{
-    const userId = req.params.id;
-    
-    if(!userId){
+    const userId = validUuid.parseSafe(req.params.id);
+
+    if(!userId.success){
         return res.status(400).json({message : "Invalid user ID"})
     }
+
+    const {id} = userId.data;
     try {
         const updatedUser = await prisma.user.update({
-            where : {id : userId},
+            where : {id},
             data:{ 
                 status : Status.APPROVED,
             }
@@ -46,8 +47,9 @@ const approveUser = async(req,res)=>{
 }
 
 const verifyEmail = async(req,res)=>{
-    const userId = req.params.id;
-    if(!userId){
+    const userId = validUuid.parseSafe(req.params.id);
+
+    if(!userId.success){
         return res.status(400).json({message : "Invalid user ID"})
     }
     try {
@@ -74,11 +76,9 @@ const verifyEmail = async(req,res)=>{
 }
 
 const getVerifiedUsers = async(req,res)=>{
-    const userBranch = req.user.branch;
     try {
         const users = await prisma.user.findMany({
             where :{
-                branch : userBranch,
                 emailVerified : true,
                 status: Status.APPROVED
             }
@@ -95,11 +95,9 @@ const getVerifiedUsers = async(req,res)=>{
 }
 
 const getRejectedUsers = async(req,res)=>{
-    const userBranch = req.user.branch;
     try {
         const users = await prisma.user.findMany({
             where :{
-                branch : userBranch,
                 status: Status.REJECTED
             }
         })
@@ -116,10 +114,13 @@ const getRejectedUsers = async(req,res)=>{
 
 //Question-route controllers
 const addQuestion =  async(req,res)=>{
-    const {question, options, type, required = true, formId} = req.body;
-    if(!question || !options || !type){
-        return res.status(400).json({message : "All fields are required"});
+    const result = questionSchema.safeParse(req.body);
+    if(!result.success){
+        return res.status(400).json({message : result.error.message});
     }
+
+    const {question, options, type, required = true, formId} = result.data;
+
     try {
         const newQuestion = await prisma.question.create({
             data : {
@@ -140,13 +141,19 @@ const addQuestion =  async(req,res)=>{
 }
 
 const editQuestions = async(req,res)=>{
-    const {question, options, type, required = true, formId} = req.body;
-    if (!question) {
-        return res.status(400).json({ message: "Question is required" });
+    const result = questionSchema.safeParse(req.body);
+    if(!result.success){
+        return res.status(400).json({message : result.error.message});
     }
+    const {question, options, type, required = true, formId} = result.data;
+    const userId = validUuid.safeParse(req.param.id);
+    if(!userId.success){
+        return res.status(400).json({message: userId.error.message});
+    }
+    const {id}=  userId.data;
     try {
         const editedQuestion =  await prisma.question.update({
-            where: {id : req.params.id},
+            where: {id},
             data: { 
                 question,
                 type,
@@ -166,15 +173,23 @@ const editQuestions = async(req,res)=>{
 }
 
 const deleteQuestion = async(req, res)=>{
-    const questionId = req.params.id;
-    if(!questionId){
-        res.status(400).json({message: "Invalid question ID"});
+    const questionId = validUuid.safeParse(req.params.id);
+    if(!questionId.success){
+        return res.status(400).json({message : questionId.error.message});
     }
+    const {id} = questionId.data;
+
+    const formId = validUuid.safeParse(req.form.id);
+    if(!formId.success){
+        return res.status(400).json({message: formId.error.message});
+    }
+    const {form_id} = formId.data;
+
     try {
         const question = await prisma.question.deleteMany({
             where: {
-                id: questionId,
-                formId : req.form.id,
+                id,
+                formId: form_id,
             },
         });
         if(question.count === 0){
@@ -190,14 +205,27 @@ const deleteQuestion = async(req, res)=>{
 //Form-route controllers
 const createForm = async(req,res)=>{
     const {formName} = req.body;
+    if(!formName){
+        return res.status(400).json({message : "FormName is required"});
+    }
+
+    const userId = validUuid.safeParse(req.user.id);
+    if(!userId.success){
+        return res.status(400).json({message : questionId.error.message});
+    }
+    const {id} = userId.data;
     try {
         const form = await prisma.form.create({
             data:{ 
                 formName,
-                user : {connect : {id : req.user.id}},
+                user : {connect : {id}},
             }
         })
-        res.cookie("form", form.id);
+        res.cookie("form", form.id,{
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict"
+        });
         return res.status(201).json({message : "Form created successfully"});
     } catch (err) {
         console.error("An error occured", err);
@@ -224,17 +252,26 @@ const publishForm = async(req,res)=>{
 }
 
 const deleteForm = async(req,res)=>{
-    const formId = req.params.id;
-    if(!formId){
-        res.status(400).json({message: "Invalid form ID"});
+    const formId = validUuid.safeParse(req.params.id);
+    if(!formId.success){
+        return res.status(400).json({message: formId.error.message});
     }
+    const {id} = formId.data;
+
+    const userId = validUuid.safeParse(req.user.id );
+    if(!userId.success){
+        return res.status(400).json({message: formId.error.message});
+    }
+    const {user_id} = userId.data;
+
     try {
         const form = await prisma.form.deleteMany({
-            where: { id: formId, userId : req.user.id },
+            where: { id, userId : user_id},
         });
         if(form.count === 0){
             return res.status(404).json({message : "Form not found"})
         }
+        res.cookie("form", "");
         return res.status(200).json({message : "Form deleted successfully"});
     } catch (err) {
         console.error("An error occured", err);
@@ -260,13 +297,14 @@ const getAllForms = async(req,res)=>{
 }
 
 const getForm = async(req,res)=>{
-    const formId = req.params.id;
-    if(!formId){
-        res.status(400).json({message: "Invalid form ID"});
+    const formId = validUuid.safeParse(req.params.id);
+    if(!formId.success){
+        res.status(400).json({message: formId.error.message});
     }
+    const {id} = formId.data;
     try {
         const form = await prisma.form.findUnique({
-            where: { id: formId },
+            where: { id },
             select: {
                 id: true,
                 formName : true,

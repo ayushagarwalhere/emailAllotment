@@ -1,5 +1,6 @@
 import { RoleType } from "@prisma/client";
 import prisma from "../config/prismaClient";
+import { createAdminSchema, validUuid } from "../zod-schema/form";
 
 const getAllAdmins = async (req, res) => {
     try {
@@ -28,10 +29,13 @@ const getAllAdmins = async (req, res) => {
 };
 
 const createAdmin = async (req, res) => {
-    const { name,middlename, lastname, branch, email, password } = req.body;
-    if (!email || !password || !name ||!branch) {
-        return res.status(400).json({ message: "Name, Email, Password, Branch fields are required" });
+    const admin =  createAdminSchema.safeParse(req.body);
+    if(!admin.success){
+        return res.status(400).json({message: admin.error.message});
     }
+
+    const { name,middlename, lastname, branch, email, password } = admin.data;
+
     try {
         const existingAdmin = await prisma.user.findUnique({ where: { email } });
         if (existingAdmin) {
@@ -70,14 +74,15 @@ const createAdmin = async (req, res) => {
 
 
 const deleteAdmin = async (req, res) => {
-    const adminId = req.params.id;
-    if (!adminId) {
+    const adminId = validUuid.safeParse(req.params.id);
+    if (!adminId.success) {
         return res.status(400).json({ message: "Invalid admin ID" });
     }
+    const {id} = adminId.data;
     try {
         const deletedAdmin = await prisma.user.deleteMany({
             where: { 
-                id: adminId,
+                id,
                 role: RoleType.ADMIN
             }
         }); 
