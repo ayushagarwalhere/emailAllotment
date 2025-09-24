@@ -1,0 +1,495 @@
+openapi: "3.0.0"
+info:
+  title: Admin Routes
+  version: 1.0.0
+  description: Admin Endpoints for user management and creating user forms
+
+paths:
+  /admin/users:
+    get:
+      summary: Get all users
+      security:
+        - userCookie: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        '401':
+          description: Unauthorized - Invalid or missing user cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized access"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Database connection failed"
+
+  /admin/approveUser/{id}:
+    post:
+      summary: Approve a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: User ID
+      security:
+        - userCookie: []
+      responses:
+        '200':
+          description: User approved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User approved successfully"
+                  userId:
+                    type: string
+        '400':
+          description: Bad request - Invalid user ID or user already approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid user ID or user already approved"
+        '401':
+          description: Unauthorized - Invalid or missing user cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized access"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to approve user"
+
+  /admin/verifyEmail/{id}:
+    post:
+      summary: Verify user email
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: User ID
+      security:
+        - userCookie: []
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Email verified successfully"
+                  userId:
+                    type: string
+        '400':
+          description: Bad request - Invalid user ID or email already verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid user ID or email already verified"
+        '401':
+          description: Unauthorized - Invalid or missing user cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized access"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to verify email"
+
+  /admin/verifiedUsers:
+    get:
+      summary: Get all verified users
+      security:
+        - userCookie: []
+      responses:
+        '200':
+          description: List of verified users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /admin/rejectedUsers:
+    get:
+      summary: Get all rejected users
+      security:
+        - userCookie: []
+      responses:
+        '200':
+          description: List of rejected users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  # Question routes
+  /admin/addQuestion:
+    post:
+      summary: Add a new question
+      description: Creates a new question associated with the authenticated user's form
+      security:
+        - userCookie: []
+        - formCookie: []
+      requestBody:
+        description: Question object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+                options:
+                  type: array
+                  items:
+                    type: string
+                answer:
+                  type: string
+      responses:
+        '200':
+          description: Question added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Question added successfully"
+                  questionId:
+                    type: string
+        '400':
+          description: Bad request - Invalid question data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid question format or missing required fields"
+        '401':
+          description: Unauthorized - Invalid or missing user cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized access"
+        '403':
+          description: Forbidden - User does not have access to this form
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Access denied to this form"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to add question"
+
+  /admin/editQuestion/{id}:
+    put:
+      summary: Edit a question
+      description: Updates a question only if it belongs to the authenticated user's form
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Question ID
+      security:
+        - userCookie: []
+        - formCookie: []
+      requestBody:
+        description: Updated question object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question:
+                  type: string
+                options:
+                  type: array
+                  items:
+                    type: string
+                answer:
+                  type: string
+      responses:
+        '200':
+          description: Question updated
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Forbidden - User does not have access to this question/form
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /admin/deleteQuestion/{id}:
+    delete:
+      summary: Delete a question
+      description: Deletes a question only if it belongs to the authenticated user's form
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Question ID
+      security:
+        - userCookie: []
+        - formCookie: []
+      responses:
+        '200':
+          description: Question deleted
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Forbidden - User does not have access to this question/form
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # Form routes
+  /admin/createForm:
+    post:
+      summary: Create a new form
+      description: Creates a new form associated with the authenticated user
+      security:
+        - userCookie: []
+      requestBody:
+        description: Form object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                questions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Form created
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /admin/publishForm/{id}:
+    post:
+      summary: Publish a form
+      description: Publishes a form only if it belongs to the authenticated user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Form ID
+      security:
+        - userCookie: []
+        - formCookie: []
+      responses:
+        '200':
+          description: Form published
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Forbidden - User does not have access to this form
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /admin/deleteForm/{id}:
+    delete:
+      summary: Delete a form
+      description: Deletes a form only if it belongs to the authenticated user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Form ID
+      security:
+        - userCookie: []
+        - formCookie: []
+      responses:
+        '200':
+          description: Form deleted
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Forbidden - User does not have access to this form
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /admin/forms:
+    get:
+      summary: Get all forms
+      description: Gets all forms accessible to the authenticated user
+      security:
+        - userCookie: []
+      responses:
+        '200':
+          description: List of forms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /admin/form/{id}:
+    get:
+      summary: Get a single form
+      description: Gets form details only if it belongs to the authenticated user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Form ID
+      security:
+        - userCookie: []
+        - formCookie: []
+      responses:
+        '200':
+          description: Form details
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Forbidden - User does not have access to this form
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  securitySchemes:
+    userCookie:
+      type: apiKey
+      in: cookie
+      name: user
+      description: Authentication cookie for user identification
+    formCookie:
+      type: apiKey
+      in: cookie
+      name: form
+      description: Authorization cookie to verify form ownership and access rights
