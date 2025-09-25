@@ -1,0 +1,578 @@
+openapi: "3.0.0"
+info:
+  title: Student Routes
+  version: 1.0.0
+  description: Student Endpoints for form submission, status checking, and resubmission
+
+paths:
+  /students/submit:
+    post:
+      summary: Submit a form
+      description: Allows a student to submit answers to a form
+      security:
+        - studentCookie: []
+      requestBody:
+        description: Form submission object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                formId:
+                  type: string
+                  format: uuid
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                  description: ID of the form being submitted
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      questionId:
+                        type: string
+                        format: uuid
+                        example: "123e4567-e89b-12d3-a456-426614174001"
+                      response:
+                        type: string
+                        example: "JavaScript"
+                        description: Student's answer to the question
+                    required:
+                      - questionId
+                      - response
+                  example:
+                    - questionId: "123e4567-e89b-12d3-a456-426614174001"
+                      response: "JavaScript"
+                    - questionId: "123e4567-e89b-12d3-a456-426614174002"
+                      response: "john.doe@example.com"
+              required:
+                - formId
+                - answers
+      responses:
+        '200':
+          description: Form submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Form submitted successfully"
+                  submissionId:
+                    type: string
+                    format: uuid
+                  submission:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      formId:
+                        type: string
+                        format: uuid
+                      userId:
+                        type: string
+                        format: uuid
+                      createdAt:
+                        type: string
+                        format: date-time
+                      answers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            questionId:
+                              type: string
+                              format: uuid
+                            response:
+                              type: string
+                            question:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                question:
+                                  type: string
+                                type:
+                                  type: string
+                                  enum: [TEXT, MCQ, NUMBER, EMAIL]
+        '400':
+          description: Bad request - Invalid form data, missing required fields, or form already submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid form data or form already submitted"
+        '401':
+          description: Unauthorized - Invalid or missing student cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized access"
+        '403':
+          description: Forbidden - Student not approved or form not accessible
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Access denied. Student not approved or form not accessible"
+        '404':
+          description: Form not found or questions not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Form not found or invalid question IDs"
+        '409':
+          description: Conflict - Student has already submitted this form
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "You have already submitted this form"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to submit form"
+
+  /students/status:
+    get:
+      summary: Get student status and submission details
+      description: Retrieves the current status of the student and their form submission details
+      security:
+        - studentCookie: []
+      responses:
+        '200':
+          description: Student status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      name:
+                        type: string
+                        example: "John Doe"
+                      middleName:
+                        type: string
+                        example: "Michael"
+                      lastName:
+                        type: string
+                        example: "Smith"
+                      email:
+                        type: string
+                        example: "john.doe@example.com"
+                      branch:
+                        type: string
+                        enum: [CS, DCS, EC, DEC, ME, EE, MS, MNC, EP, CH, CE]
+                        example: "CS"
+                      status:
+                        type: string
+                        enum: [PENDING, APPROVED, REJECTED]
+                        example: "APPROVED"
+                      emailVerified:
+                        type: boolean
+                        example: true
+                      role:
+                        type: object
+                        properties:
+                          role:
+                            type: string
+                            example: "STUDENT"
+                      createdAt:
+                        type: string
+                        format: date-time
+                  submission:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      formId:
+                        type: string
+                        format: uuid
+                      form:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          formName:
+                            type: string
+                          shareId:
+                            type: string
+                      answers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            response:
+                              type: string
+                            question:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                question:
+                                  type: string
+                                type:
+                                  type: string
+                      submittedAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                  canResubmit:
+                    type: boolean
+                    description: Whether the student can resubmit (true if status is REJECTED)
+                    example: false
+        '401':
+          description: Unauthorized - Invalid or missing student cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized access"
+        '403':
+          description: Forbidden - User is not a student
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Access denied. Student privileges required"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to retrieve student status"
+
+  /students/resubmit:
+    put:
+      summary: Resubmit a form (only if rejected)
+      description: Allows a student to resubmit a form with updated answers if their previous submission was rejected
+      security:
+        - studentCookie: []
+      requestBody:
+        description: Form resubmission object with updated answers
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                formId:
+                  type: string
+                  format: uuid
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                  description: ID of the form being resubmitted
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      questionId:
+                        type: string
+                        format: uuid
+                        example: "123e4567-e89b-12d3-a456-426614174001"
+                      response:
+                        type: string
+                        example: "Python"
+                        description: Updated answer to the question
+                    required:
+                      - questionId
+                      - response
+                  example:
+                    - questionId: "123e4567-e89b-12d3-a456-426614174001"
+                      response: "Python"
+                    - questionId: "123e4567-e89b-12d3-a456-426614174002"
+                      response: "john.doe@corrected.com"
+              required:
+                - formId
+                - answers
+      responses:
+        '200':
+          description: Form resubmitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Form resubmitted successfully"
+                  submissionId:
+                    type: string
+                    format: uuid
+                  submission:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      formId:
+                        type: string
+                        format: uuid
+                      userId:
+                        type: string
+                        format: uuid
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      answers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                            questionId:
+                              type: string
+                              format: uuid
+                            response:
+                              type: string
+                            question:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                question:
+                                  type: string
+                                type:
+                                  type: string
+        '400':
+          description: Bad request - Invalid form data or missing required fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid form data or missing required fields"
+        '401':
+          description: Unauthorized - Invalid or missing student cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized access"
+        '403':
+          description: Forbidden - Student cannot resubmit (not rejected or no previous submission)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Access denied. You can only resubmit if your previous submission was rejected"
+        '404':
+          description: Form not found, no previous submission found, or invalid question IDs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Form not found or no previous submission exists"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to resubmit form"
+
+  /students/forms/available:
+    get:
+      summary: Get available forms for submission
+      description: Retrieves all forms that are available for the student to submit
+      security:
+        - studentCookie: []
+      responses:
+        '200':
+          description: List of available forms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    formName:
+                      type: string
+                      example: "Student Registration Form"
+                    shareId:
+                      type: string
+                      example: "abc123def456"
+                    creator:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        email:
+                          type: string
+                    questionCount:
+                      type: integer
+                      example: 5
+                    hasSubmitted:
+                      type: boolean
+                      example: false
+                      description: Whether the student has already submitted this form
+                    createdAt:
+                      type: string
+                      format: date-time
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Student not approved
+        '500':
+          description: Internal server error
+
+  /students/form/{shareId}:
+    get:
+      summary: Get form details by share ID
+      description: Retrieves form details and questions using the form's share ID
+      parameters:
+        - in: path
+          name: shareId
+          required: true
+          schema:
+            type: string
+          description: Form share ID
+          example: "abc123def456"
+      security:
+        - studentCookie: []
+      responses:
+        '200':
+          description: Form details with questions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  formName:
+                    type: string
+                    example: "Student Registration Form"
+                  shareId:
+                    type: string
+                  creator:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      email:
+                        type: string
+                  questions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        question:
+                          type: string
+                          example: "What is your favorite programming language?"
+                        type:
+                          type: string
+                          enum: [TEXT, MCQ, NUMBER, EMAIL]
+                          example: "MCQ"
+                        required:
+                          type: boolean
+                          example: true
+                        options:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              option:
+                                type: string
+                          nullable: true
+                  hasSubmitted:
+                    type: boolean
+                    example: false
+                  createdAt:
+                    type: string
+                    format: date-time
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Student not approved
+        '404':
+          description: Form not found
+        '500':
+          description: Internal server error
+
+components:
+  securitySchemes:
+    studentCookie:
+      type: apiKey
+      in: cookie
+      name: student
+      description: Authentication cookie for student identification and authorization
