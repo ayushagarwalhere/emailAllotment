@@ -10,11 +10,18 @@ const submitForm = async (req, res) => {
 
     if (!userId) return res.status(401).json({ error: "User not authenticated" });
 
+    const formExists = await prisma.form.findUnique({
+      where: { id: formId }
+    });
+
+    if (!formExists) 
+      return res.status(404).json({ error: "form not found " });
+
     const existingSubmission = await prisma.submission.findUnique({
       where: { userId }
     });
     if (existingSubmission) {
-      return res.status(400).json({ error: "You have already submitted the form" });
+      return res.status(409).json({ error: "You have already submitted the form" });
     }
 
     const submission = await prisma.submission.create({
@@ -36,9 +43,9 @@ const submitForm = async (req, res) => {
       data: { status: Status.PENDING }
     });
 
-    res.status(201).json({ message: "Form submitted successfully", submission });
+    res.status(200).json({ message: "Form submitted successfully", submission });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -53,9 +60,9 @@ const status = async (req, res) => {
       where: { id: userId },
       select: { status: true }
     });
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) return res.status(401).json({ error: "User not found" });
 
-    res.json({ status: user.status });
+    res.status(200).json({ status: user.status });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -76,7 +83,7 @@ const resubmit = async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (user.status !== "REJECTED") {
-      return res.status(400).json({ error: `Cannot resubmit. Current status is ${user.status}` });
+      return res.status(403).json({ error: `Cannot resubmit. Current status is ${user.status}` });
     }
 
     //  Find the existing submission
@@ -120,7 +127,7 @@ const resubmit = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
