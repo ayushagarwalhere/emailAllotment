@@ -1,6 +1,7 @@
 import { RoleType } from "@prisma/client";
 import prisma from "../config/prismaClient";
 import { createAdminSchema, validUuid } from "../zod-schema/form";
+import { addAdmins, deleteAdmins } from "../queues/superAdminQueue";
 
 const getAllAdmins = async (req, res) => {
     try {
@@ -33,38 +34,16 @@ const createAdmin = async (req, res) => {
     if(!admin.success){
         return res.status(400).json({message: admin.error.message});
     }
-
-    const { name,middlename, lastname, branch, email, password } = admin.data;
-
     try {
-        const existingAdmin = await prisma.user.findUnique({ where: { email } });
+        const existingAdmin = await prisma.user.findUnique({ where: { email : admin.data.email } });
         if (existingAdmin) {
             return res.status(409).json({ message: "Admin with this email already exists" });
         }
-        const newAdmin = await prisma.user.create({
-            data: {
-                name,
-                middlename,
-                lastname,
-                branch,
-                email,
-                password,
-                role: RoleType.ADMIN,
-            },
-            select: {
-                id: true,
-                name: true,
-                name : true,
-                branch : true,
-                email: true,
-                role: true,
-                createdAt: true,
-                updatedAt: true,
-            }
-        });
-        return res.status(201).json({ 
-            message: "Admin created successfully",
-            admin: newAdmin
+        const job = await addAdmins(admin.data);
+        return res.status(202).json({ 
+            message: "Make admin request submitted successfully",
+            jobId : job.id,
+            status : "Processing"
          });
     } catch (err) {
         console.error("An error occurred", err);
@@ -78,18 +57,29 @@ const deleteAdmin = async (req, res) => {
     if (!adminId.success) {
         return res.status(400).json({ message: "Invalid admin ID" });
     }
-    const {id} = adminId.data;
     try {
-        const deletedAdmin = await prisma.user.deleteMany({
+        const admin = await prisma.user.findFirst({
             where: { 
-                id,
+                id: adminId.data,
                 role: RoleType.ADMIN
+            },
+            select: { 
+                id: true, 
+                email: true,
+                name : true,
             }
-        }); 
-        if (deletedAdmin.count === 0) {
+        });
+
+        if (!admin) {
             return res.status(404).json({ message: "Admin not found" });
         }
-        return res.status(200).json({ message: "Admin deleted successfully" });
+        const job = await deleteAdmins(admin);
+        return res.status(202).json({ 
+            message: "Delete admin request submitted successfully",
+            jobId : job.id,
+            email : admin.email,
+            status : "Processing",
+         });
     } catch (err) {
         console.error("An error occurred", err);
         return res.status(500).json({ message: "Error while deleting the admin" });

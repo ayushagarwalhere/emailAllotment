@@ -2,11 +2,11 @@ import express from 'express'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser';
 import cors from "cors";
-import healthCheckRoute from "./src/routes/health-check.js";
-import { rateLimiterMiddleware } from "./middleware/rate-limiter.js";
-import routes from './src/routes/adminRoutes.js';
-import superAdminRoutes from './src/routes/superAdminRoutes.js';
-import studentRoutes from './routes/studentRoutes.js';
+// import healthCheckRoute from "./src/routes/health-check.js";
+// import { rateLimiterMiddleware } from "./middleware/rate-limiter.js";
+// import routes from './src/routes/adminRoutes.js';
+// import superAdminRoutes from './src/routes/superAdminRoutes.js';
+// import studentRoutes from './routes/studentRoutes.js';
 import {swaggerUi,swaggerSpec} from './src/utils/swagger.js'
 
 const app = express();
@@ -28,10 +28,10 @@ app.use(
   }),
 );
 
-app.use("/health-check", rateLimiterMiddleware, healthCheckRoute);
-app.use('/admin', routes);
-app.use('/superadmin', superAdminRoutes);
-app.use("/students", studentRoutes);
+// app.use("/health-check", rateLimiterMiddleware, healthCheckRoute);
+// app.use('/admin', routes);
+// app.use('/superadmin', superAdminRoutes);
+// app.use("/students", studentRoutes);
 
 
 app.listen(PORT, ()=>{
