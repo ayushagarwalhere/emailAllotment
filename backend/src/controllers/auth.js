@@ -213,7 +213,8 @@ export const sendOTP = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
     const otp = generateOtp();
-    await setAsync(email, otp, parseDuration(OTP_EXPIRATION));
+    const otpHash = await bcrypt.hash(otp, 10);
+    await setAsync(email, otpHash, parseDuration(OTP_EXPIRATION));
     res.status(200).json({
       message: "OTP sent to your email for login verification.",
     });
@@ -232,7 +233,8 @@ export const verifyOtp = async (req, res) => {
   const { email, otp } = isValid.data;
   try {
     const storedOtp = await getAsync(email);
-    if (!storedOtp || storedOtp !== otp) {
+    const otpHash = await bcrypt.hash(otp, 10);
+    if (!storedOtp || storedOtp !== otpHash) {
       return res.status(401).json({ error: "Invalid or expired OTP" });
     }
     await delAsync(`login-otp:${email}`);
