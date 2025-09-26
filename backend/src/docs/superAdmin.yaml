@@ -1,7 +1,7 @@
 openapi: "3.0.0"
 info:
   title: SuperAdmin Routes
-  version: 1.0.0
+  version: 1.0.1
   description: SuperAdmin Endpoints for admin management and system administration
 
 paths:
@@ -50,29 +50,11 @@ paths:
                   message:
                     type: string
                     example: "Admin created successfully"
-                  adminId:
+                  jobId:
                     type: string
-                  admin:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      username:
-                        type: string
-                      email:
-                        type: string
-                      firstName:
-                        type: string
-                      lastName:
-                        type: string
-                      role:
-                        type: string
-                        example: "admin"
-                      createdAt:
-                        type: string
-                        format: date-time
+                    example: "job-uuid-12345"
         '400':
-          description: Bad request - Invalid admin data or user already exists
+          description: Bad request - Invalid admin data
           content:
             application/json:
               schema:
@@ -101,6 +83,16 @@ paths:
                   error:
                     type: string
                     example: "Access denied. Super admin privileges required"
+        '409':
+          description: Conflict - Admin with this email already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Admin with this email already exists"
         '500':
           description: Internal server error
           content:
@@ -110,7 +102,7 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Failed to create admin"
+                    example: "Error while creating admin"
 
   /superadmin/admins:
     get:
@@ -140,7 +132,7 @@ paths:
                       type: string
                     role:
                       type: string
-                      example: "admin"
+                      example: "ADMIN"
                     isApproved:
                       type: boolean
                     isVerified:
@@ -208,6 +200,7 @@ paths:
                     example: "Admin deleted successfully"
                   deletedAdminId:
                     type: string
+                    example: "admin-uuid-12345"
         '400':
           description: Bad request - Invalid admin ID
           content:

@@ -32,7 +32,10 @@ const getAllAdmins = async (req, res) => {
 const createAdmin = async (req, res) => {
     const admin =  createAdminSchema.safeParse(req.body);
     if(!admin.success){
-        return res.status(400).json({message: admin.error.message});
+        return res.status(400).json({
+            message: "Invalid admin data or username/email already exists" ,
+            error: admin.error.message
+        });
     }
     try {
         const existingAdmin = await prisma.user.findUnique({ where: { email : admin.data.email } });
@@ -40,10 +43,9 @@ const createAdmin = async (req, res) => {
             return res.status(409).json({ message: "Admin with this email already exists" });
         }
         const job = await addAdmins(admin.data);
-        return res.status(202).json({ 
-            message: "Make admin request submitted successfully",
+        return res.status(200).json({ 
+            message: "Admin created successfully",
             jobId : job.id,
-            status : "Processing"
          });
     } catch (err) {
         console.error("An error occurred", err);
@@ -74,15 +76,15 @@ const deleteAdmin = async (req, res) => {
             return res.status(404).json({ message: "Admin not found" });
         }
         const job = await deleteAdmins(admin);
-        return res.status(202).json({ 
-            message: "Delete admin request submitted successfully",
+        return res.status(200).json({ 
+            message: "Admin deleted successfully",
+            adminId : admin.data.id,
             jobId : job.id,
             email : admin.email,
-            status : "Processing",
          });
     } catch (err) {
-        console.error("An error occurred", err);
-        return res.status(500).json({ message: "Error while deleting the admin" });
+        console.error("Failed to delete admin", err);
+        return res.status(500).json({ message: "Failed to delete admin" });
     }
 };
 

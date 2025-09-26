@@ -5,17 +5,16 @@ const isSuperAdmin = async (req, res, next) => {
   try {
     const userData = req.user;
     if (!userData || !userData.email) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized access" });
     }
 
-    
     const user = await prisma.user.findUnique({
       where: { email: userData.email },
       include: { role: true },
     });
 
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({ message: "Unauthorized access" });
     }
 
     if (user.role.role === RoleType.SUPERADMIN) {
@@ -25,7 +24,7 @@ const isSuperAdmin = async (req, res, next) => {
     }
   } catch (error) {
     console.error("An error occurred", error);
-    return res.status(500).json({ message: "Some error occurred" });
+    return res.status(500).json({ message: "Failed to create admin" });
   }
 };
 
