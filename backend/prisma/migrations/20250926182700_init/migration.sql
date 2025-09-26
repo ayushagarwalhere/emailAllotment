@@ -21,6 +21,7 @@ CREATE TABLE "public"."User" (
     "branch" "public"."Branch" NOT NULL,
     "roleId" UUID NOT NULL,
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "emailAlloted" BOOLEAN NOT NULL DEFAULT false,
     "status" "public"."Status" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

@@ -7,7 +7,8 @@ const getUser = async(req,res)=>{
     try {
         const users = await prisma.user.findMany({
             where :{
-                emailVerified : false,
+                emailVerified : true,
+                emailAlloted : false,
                 status: {
                     in: [Status.PENDING, Status.REJECTED]
                 }
@@ -46,15 +47,16 @@ const approveUser = async(req,res)=>{
     }
 }
 
-const verifyEmail = async(req,res)=>{
+const allotEmail = async(req,res)=>{
     const userId = validUuid.parseSafe(req.params.id);
 
     if(!userId.success){
         return res.status(400).json({message : "Invalid user ID"})
     }
+    const {id} = userId.data;
     try {
         const user = await prisma.user.findUnique({
-            where : {id : userId},
+            where : {id},
         })
         if(!user){
             return res.status(404).json({message : "User not found"})
@@ -65,7 +67,7 @@ const verifyEmail = async(req,res)=>{
         const updatedUser = await prisma.user.update({
             where : {id : userId},
             data:{
-                emailVerified : true,
+                emailAlloted : true,
             }
         })
         return res.status(200).json({message : "Email has been verified successfully", updatedUser});
@@ -80,6 +82,7 @@ const getVerifiedUsers = async(req,res)=>{
         const users = await prisma.user.findMany({
             where :{
                 emailVerified : true,
+                emailAlloted : true,
                 status: Status.APPROVED
             }
         }) 
@@ -90,7 +93,7 @@ const getVerifiedUsers = async(req,res)=>{
         })
     } catch (err) {
         console.error("An error occured", err);
-        return res.status(500).json({message: "Some error occured"});
+        return res.status(500).json({message: "Error while fetching verified users"});
     }
 }
 
@@ -98,6 +101,7 @@ const getRejectedUsers = async(req,res)=>{
     try {
         const users = await prisma.user.findMany({
             where :{
+                emailVerified : true,
                 status: Status.REJECTED
             }
         })
@@ -108,7 +112,7 @@ const getRejectedUsers = async(req,res)=>{
         })
     } catch (err) {
         console.error("An error occured", err);
-        return res.status(500).json({message: "Some error occured"});
+        return res.status(500).json({message: "Error while fetching rejected users"});
     }
 }
 
@@ -136,7 +140,7 @@ const addQuestion =  async(req,res)=>{
         return res.status(201).json({message : "Question added successfully", newQuestion});
     } catch (err) {
         console.error("An error occured", err);
-        return res.status(500).json({message : "Error while adding the question"});
+        return res.status(500).json({message : "Failed to add question"});
     }
 }
 
@@ -146,7 +150,7 @@ const editQuestions = async(req,res)=>{
         return res.status(400).json({message : result.error.message});
     }
     const {question, options, type, required = true, formId} = result.data;
-    const userId = validUuid.safeParse(req.param.id);
+    const userId = validUuid.safeParse(req.params.id);
     if(!userId.success){
         return res.status(400).json({message: userId.error.message});
     }
@@ -168,7 +172,7 @@ const editQuestions = async(req,res)=>{
         return res.status(200).json({message : "Question edited successfully", editedQuestion});
     } catch (err) {
         console.error("An error occured", err);
-        return res.status(500).json({message : "Error while editing the question"});
+        return res.status(500).json({message : "Failed to edit question"});
     }
 }
 
@@ -198,7 +202,7 @@ const deleteQuestion = async(req, res)=>{
         return res.status(200).json({message : "Question deleted successfully"});
     } catch (err) {
         console.error("An error occured", err);
-        return res.status(500).json({message : "Error while deleting the question"});
+        return res.status(500).json({message : "Failed to delete question"});
     }
 }
 
@@ -229,7 +233,7 @@ const createForm = async(req,res)=>{
         return res.status(201).json({message : "Form created successfully"});
     } catch (err) {
         console.error("An error occured", err);
-        return res.status(500).json({message : "Error while creating the form"});
+        return res.status(500).json({message : "Failed to create form"});
     }
 }
 
@@ -247,7 +251,10 @@ const publishForm = async(req,res)=>{
         })
         return res.status(200).json({message : "Form is live now"});
     } catch (error) {
-        return res.status(400).json({message: error.message})
+        return res.status(400).json({
+            message : "Failed to publish form",
+            error: error.message
+        })
     }
 }
 
@@ -275,7 +282,7 @@ const deleteForm = async(req,res)=>{
         return res.status(200).json({message : "Form deleted successfully"});
     } catch (err) {
         console.error("An error occured", err);
-        return res.status(500).json({message : "Error while deleting the form"});
+        return res.status(500).json({message : "Failed to delete form"});
     }
 }
 
@@ -316,11 +323,14 @@ const getForm = async(req,res)=>{
         if(!form){
             return res.status(404).json({message : "Form not found"})
         }
-        return res.status(200).json({form});
+        return res.status(200).json({
+            message : "Form fetched successfully",
+            form
+        });
     } catch (err) {
         console.error("An error occured", err);
         return res.status(500).json({message : "Error while fetching the form"});
     }
 }
 
-export {getUser, approveUser, verifyEmail, getVerifiedUsers, getRejectedUsers, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm};
+export {getUser, approveUser, allotEmail, getVerifiedUsers, getRejectedUsers, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm};

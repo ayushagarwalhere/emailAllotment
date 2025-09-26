@@ -2,56 +2,68 @@ openapi: "3.0.0"
 info:
   title: Admin Routes
   version: 1.0.0
-  description: Admin Endpoints for user management and creating user forms
+  description: |
+    Endpoints for Admin functionality including user approvals, email allotment, 
+    form creation/publishing, and question management.
+
+servers:
+  - url: http://localhost:5000
+    description: Local development server
 
 paths:
   /admin/users:
     get:
-      summary: Get all users
+      summary: Get pending users
+      description: Fetches users who are `emailVerified = true`, `emailAlloted = false` and `status = PENDING or REJECTED`.
       security:
         - userCookie: []
       responses:
         '200':
-          description: List of users
+          description: Users fetched successfully
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
+                type: object
+                properties:
+                  message: { type: string, example: "Users fetched" }
+                  count: { type: integer, example: 2 }
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, example: "user-uuid-123" }
+                        email: { type: string, example: "user@example.com" }
+                        status: { type: string, example: "PENDING" }
         '401':
-          description: Unauthorized - Invalid or missing user cookie
+          description: Unauthorized - No valid admin cookie
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Unauthorized access"
+                  message: { type: string, example: "Unauthorized" }
         '500':
-          description: Internal server error
+          description: Server error
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Database connection failed"
+                  message: { type: string, example: "Some error occurred" }
 
   /admin/approveUser/{id}:
-    post:
+    patch:
       summary: Approve a user
+      description: Approves a user by setting status = APPROVED.
+      security:
+        - userCookie: []
       parameters:
         - in: path
           name: id
+          schema: { type: string }
           required: true
-          schema:
-            type: string
-          description: User ID
-      security:
-        - userCookie: []
+          description: UUID of the user
       responses:
         '200':
           description: User approved successfully
@@ -60,97 +72,63 @@ paths:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
-                    example: "User approved successfully"
-                  userId:
-                    type: string
+                  message: { type: string, example: "User has been verified successfully" }
+                  updatedUser:
+                    type: object
+                    properties:
+                      id: { type: string, example: "user-uuid-123" }
+                      status: { type: string, example: "APPROVED" }
         '400':
-          description: Bad request - Invalid user ID or user already approved
+          description: Invalid user ID
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Invalid user ID or user already approved"
-        '401':
-          description: Unauthorized - Invalid or missing user cookie
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Unauthorized access"
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "User not found"
+                  message: { type: string, example: "Invalid user ID" }
         '500':
-          description: Internal server error
+          description: Server error while approving user
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Failed to approve user"
+                  message: { type: string, example: "Error while verifying" }
 
-  /admin/verifyEmail/{id}:
-    post:
-      summary: Verify user email
+  /admin/allotEmail/{id}:
+    patch:
+      summary: Allot email to approved user
+      description: Marks a user’s `emailAlloted = true`. Only allowed if user is `APPROVED`.
+      security:
+        - userCookie: []
       parameters:
         - in: path
           name: id
+          schema: { type: string }
           required: true
-          schema:
-            type: string
-          description: User ID
-      security:
-        - userCookie: []
+          description: UUID of the user
       responses:
         '200':
-          description: Email verified successfully
+          description: Email allotted successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
-                    example: "Email verified successfully"
-                  userId:
-                    type: string
+                  message: { type: string, example: "Email has been verified successfully" }
+                  updatedUser:
+                    type: object
+                    properties:
+                      id: { type: string, example: "user-uuid-123" }
+                      emailAlloted: { type: boolean, example: true }
         '400':
-          description: Bad request - Invalid user ID or email already verified
+          description: Email not approved or invalid ID
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Invalid user ID or email already verified"
-        '401':
-          description: Unauthorized - Invalid or missing user cookie
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Unauthorized access"
+                  message: { type: string, example: "Email is not approved yet" }
         '404':
           description: User not found
           content:
@@ -158,328 +136,188 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "User not found"
+                  message: { type: string, example: "User not found" }
         '500':
-          description: Internal server error
+          description: Error while allotting email
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Failed to verify email"
+                  message: { type: string, example: "Error while verifying email" }
 
-  /admin/verifiedUsers:
-    get:
-      summary: Get all verified users
-      security:
-        - userCookie: []
-      responses:
-        '200':
-          description: List of verified users
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-
-  /admin/rejectedUsers:
-    get:
-      summary: Get all rejected users
-      security:
-        - userCookie: []
-      responses:
-        '200':
-          description: List of rejected users
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-
-  # Question routes
-  /admin/addQuestion:
+  /admin/createForm:
     post:
-      summary: Add a new question
-      description: Creates a new question associated with the authenticated user's form
+      summary: Create a new form
+      description: Creates a form and sets a `form` cookie containing the form ID.
       security:
         - userCookie: []
-        - formCookie: []
       requestBody:
-        description: Question object
         required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                question:
-                  type: string
+                formName: { type: string, example: "Admission Form 2025" }
+      responses:
+        '201':
+          description: Form created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Form created successfully" }
+        '400':
+          description: Missing formName or invalid user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "FormName is required" }
+        '500':
+          description: Failed to create form
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Failed to create form" }
+
+  /admin/publishForm:
+    post:
+      summary: Publish a form
+      description: Publishes the form stored in the `form` cookie. Only one form can be live at a time.
+      security:
+        - userCookie: []
+        - formCookie: []
+      responses:
+        '200':
+          description: Form published successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Form is live now" }
+        '400':
+          description: Another form is already live
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Another form is live" }
+        '500':
+          description: Failed to publish form
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: "Failed to publish form" }
+
+  /admin/addQuestion:
+    post:
+      summary: Add a question to form
+      description: Adds a question to the form specified in the `form` cookie.
+      security:
+        - userCookie: []
+        - formCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                question: { type: string, example: "What is your name?" }
+                type: { type: string, example: "TEXT" }
+                required: { type: boolean, example: true }
                 options:
                   type: array
                   items:
                     type: string
-                answer:
-                  type: string
+                  example: ["Option 1", "Option 2"]
       responses:
-        '200':
+        '201':
           description: Question added successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
-                    type: string
-                    example: "Question added successfully"
-                  questionId:
-                    type: string
+                  message: { type: string, example: "Question added successfully" }
+                  newQuestion:
+                    type: object
+                    properties:
+                      id: { type: string, example: "question-uuid-123" }
+                      question: { type: string, example: "What is your name?" }
         '400':
-          description: Bad request - Invalid question data
+          description: Invalid question data
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Invalid question format or missing required fields"
-        '401':
-          description: Unauthorized - Invalid or missing user cookie
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Unauthorized access"
-        '403':
-          description: Forbidden - User does not have access to this form
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Access denied to this form"
+                  message: { type: string, example: "Invalid question payload" }
         '500':
-          description: Internal server error
+          description: Failed to add question
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: "Failed to add question"
-
-  /admin/editQuestion/{id}:
-    put:
-      summary: Edit a question
-      description: Updates a question only if it belongs to the authenticated user's form
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: Question ID
-      security:
-        - userCookie: []
-        - formCookie: []
-      requestBody:
-        description: Updated question object
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                question:
-                  type: string
-                options:
-                  type: array
-                  items:
-                    type: string
-                answer:
-                  type: string
-      responses:
-        '200':
-          description: Question updated
-          content:
-            application/json:
-              schema:
-                type: object
-        '403':
-          description: Forbidden - User does not have access to this question/form
-          content:
-            application/json:
-              schema:
-                type: object
+                  message: { type: string, example: "Failed to add question" }
 
   /admin/deleteQuestion/{id}:
     delete:
       summary: Delete a question
-      description: Deletes a question only if it belongs to the authenticated user's form
+      description: Deletes a question by ID, ensuring it belongs to the form in the `form` cookie.
+      security:
+        - userCookie: []
+        - formCookie: []
       parameters:
         - in: path
           name: id
           required: true
-          schema:
-            type: string
-          description: Question ID
-      security:
-        - userCookie: []
-        - formCookie: []
+          schema: { type: string }
+          description: Question ID to delete
       responses:
         '200':
-          description: Question deleted
+          description: Question deleted successfully
           content:
             application/json:
               schema:
                 type: object
-        '403':
-          description: Forbidden - User does not have access to this question/form
+                properties:
+                  message: { type: string, example: "Question deleted successfully" }
+        '400':
+          description: Invalid question or form ID
           content:
             application/json:
               schema:
                 type: object
-
-  # Form routes
-  /admin/createForm:
-    post:
-      summary: Create a new form
-      description: Creates a new form associated with the authenticated user
-      security:
-        - userCookie: []
-      requestBody:
-        description: Form object
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                questions:
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '200':
-          description: Form created
+                properties:
+                  message: { type: string, example: "Invalid question ID" }
+        '404':
+          description: Question not found
           content:
             application/json:
               schema:
                 type: object
-
-  /admin/publishForm/{id}:
-    post:
-      summary: Publish a form
-      description: Publishes a form only if it belongs to the authenticated user
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: Form ID
-      security:
-        - userCookie: []
-        - formCookie: []
-      responses:
-        '200':
-          description: Form published
+                properties:
+                  message: { type: string, example: "Question not found" }
+        '500':
+          description: Failed to delete question
           content:
             application/json:
               schema:
                 type: object
-        '403':
-          description: Forbidden - User does not have access to this form
-          content:
-            application/json:
-              schema:
-                type: object
-
-  /admin/deleteForm/{id}:
-    delete:
-      summary: Delete a form
-      description: Deletes a form only if it belongs to the authenticated user
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: Form ID
-      security:
-        - userCookie: []
-        - formCookie: []
-      responses:
-        '200':
-          description: Form deleted
-          content:
-            application/json:
-              schema:
-                type: object
-        '403':
-          description: Forbidden - User does not have access to this form
-          content:
-            application/json:
-              schema:
-                type: object
-
-  /admin/forms:
-    get:
-      summary: Get all forms
-      description: Gets all forms accessible to the authenticated user
-      security:
-        - userCookie: []
-      responses:
-        '200':
-          description: List of forms
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-
-  /admin/form/{id}:
-    get:
-      summary: Get a single form
-      description: Gets form details only if it belongs to the authenticated user
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: Form ID
-      security:
-        - userCookie: []
-        - formCookie: []
-      responses:
-        '200':
-          description: Form details
-          content:
-            application/json:
-              schema:
-                type: object
-        '403':
-          description: Forbidden - User does not have access to this form
-          content:
-            application/json:
-              schema:
-                type: object
+                properties:
+                  message: { type: string, example: "Failed to delete question" }
 
 components:
   securitySchemes:
@@ -487,9 +325,9 @@ components:
       type: apiKey
       in: cookie
       name: user
-      description: Authentication cookie for user identification
+      description: Authentication cookie for admin identification
     formCookie:
       type: apiKey
       in: cookie
       name: form
-      description: Authorization cookie to verify form ownership and access rights
+      description: Cookie to track current form being created or edited

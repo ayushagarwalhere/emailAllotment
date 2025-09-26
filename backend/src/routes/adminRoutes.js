@@ -1,13 +1,13 @@
 import { Router } from "express";
 
 const router = Router();
-import {getUser, approveUser, verifyEmail, getVerifiedUsers, getRejectedUsers, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm} from '../controllers/adminControls.js'
+import {getUser, approveUser, allotEmail, getVerifiedUsers, getRejectedUsers, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm} from '../controllers/adminControls.js'
 import IsAdmin from '../middlewares/isAdmin.js';
 
 //User routes
 router.get('/users', IsAdmin, getUser);
 router.post('/approveUser/:id', IsAdmin, approveUser);
-router.post('/verifyEmail/:id', IsAdmin, verifyEmail);
+router.post('/allotEmail/:id', IsAdmin, allotEmail);
 router.get('/verifiedUsers', IsAdmin, getVerifiedUsers);
 router.get('/rejectedUsers', IsAdmin, getRejectedUsers);
 

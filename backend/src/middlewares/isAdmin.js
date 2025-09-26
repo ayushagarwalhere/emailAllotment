@@ -14,7 +14,7 @@ const isAdmin = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
     if (user.role.role === RoleType.ADMIN) {
@@ -24,7 +24,7 @@ const isAdmin = async (req, res, next) => {
     }
   } catch (error) {
     console.error("An error occurred", error);
-    return res.status(500).json({ message: "Some error occurred" });
+    return res.status(500).json({ message: "Failed to authorize admins" });
   }
 };
 

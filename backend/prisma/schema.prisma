@@ -21,6 +21,7 @@ model User {
   submission    Submission?
   refreshToken  RefreshToken[]
   emailVerified Boolean       @default(false)
+  emailAlloted  Boolean       @default(false)
   status        Status        @default(PENDING)
 
   createdAt DateTime @default(now())
