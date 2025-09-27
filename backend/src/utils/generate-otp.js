@@ -1,3 +1,7 @@
-export function generateOtp() {
-  return Math.random().toString(36).slice(-6);
+import bcrypt from 'bcryptjs';
+
+export async function generateOtp() { 
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  const hashedOTP = await bcrypt.hash(otp.toString(), 10);
+  return {hashedOTP, otp};
 }

@@ -183,17 +183,16 @@ const deleteQuestion = async(req, res)=>{
     }
     const {id} = questionId.data;
 
-    const formId = validUuid.safeParse(req.form.id);
+    const formId = validUuid.safeParse(req.cookies.form.id);
     if(!formId.success){
         return res.status(400).json({message: formId.error.message});
     }
-    const {form_id} = formId.data;
 
     try {
         const question = await prisma.question.deleteMany({
             where: {
                 id,
-                formId: form_id,
+                formId: formId.data,
             },
         });
         if(question.count === 0){
@@ -213,7 +212,7 @@ const createForm = async(req,res)=>{
         return res.status(400).json({message : "FormName is required"});
     }
 
-    const userId = validUuid.safeParse(req.user.id);
+    const userId = validUuid.safeParse(req.cookies.user.id);
     if(!userId.success){
         return res.status(400).json({message : questionId.error.message});
     }
@@ -265,15 +264,14 @@ const deleteForm = async(req,res)=>{
     }
     const {id} = formId.data;
 
-    const userId = validUuid.safeParse(req.user.id );
+    const userId = validUuid.safeParse(req.cookies.user.id );
     if(!userId.success){
         return res.status(400).json({message: formId.error.message});
     }
-    const {user_id} = userId.data;
 
     try {
         const form = await prisma.form.deleteMany({
-            where: { id, userId : user_id},
+            where: { id, userId : userId.data},
         });
         if(form.count === 0){
             return res.status(404).json({message : "Form not found"})
