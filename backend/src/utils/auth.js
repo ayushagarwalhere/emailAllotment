@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
+import { delAsync, getAsync } from "../config/db";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "15m";
@@ -91,3 +92,24 @@ export async function handleOtpVerification(email, otpKey, dataKey) {
   await delAsync(dataKey);
   return JSON.parse(dataStr);
 }
+
+
+export const verifyOTP_func = async (email, otpEntered) => {
+  try {
+    const otp = await getAsync(email);
+    if (!otp) {
+      throw new Error("OTP Expired or Invalid");
+    }
+
+    const isValid = await bcrypt.compare(otpEntered.toString(), otp);
+    if (!isValid) {
+      throw new Error("Invalid OTP");
+    }
+
+    await delAsync(email);
+    return true;
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    throw new Error("Internal server error during OTP verification");
+  }
+};
