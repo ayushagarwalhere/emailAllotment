@@ -1,17 +1,38 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 
 
 const Signup = () => {
-    const emailRef = useRef();
-    const passwordRef = useRef();
+    const [name,setName]= useState('');
+    const [middleName,setmiddleName]= useState('');
+    const [lastName,setLastName]= useState('');
+    const [password,setPassword]= useState('');
+    const [email,setEmail]= useState('');
+    const [branch,setBranch]= useState('CS');
     const branches = [
         "CS", "DCS", "EC", "DEC", "EE", "ME", "MNC", "CH", "CE", "EP", "CH", "MS"
     ]
-    const handleOnSubmit = ()=>{
-        console.log("submitted");
+    const handleOnSubmit = async(e)=>{
+        e.preventDefault();
+        console.log({ name, middleName, lastName, email, password, branch });
+        const user ={
+            name, 
+            middleName, 
+            lastName, 
+            email, 
+            password, 
+            rollNumber, 
+            branch,
+        }
+        try {
+            const response = await axios.post('/api/student/signup', user);
+            localStorage.setItem('email', email);
+            console.log(response);
+        } catch (error) {
+            console.error(error);
+        }        
     }
   return (
-    <div className='min-h-screen w-full flex'>
+    <div className='min-h-screen h-max w-full flex bg-black'>
         <div className='w-1/2 h-full bg-neutral-950 text-white'>
             <div className='flex flex-col gap-3 items-center justify-center w-full h-full py-5'>
                 <h1 className='w-full text-center font-bold text-2xl'>Login to your account</h1>
@@ -20,27 +41,41 @@ const Signup = () => {
                     <div className='w-2/3'>
                         <label htmlFor="firstName" className='font-medium'>Name</label>
                         <input 
-                            placeholder='hello@gmail.com'
-                            type='email'
-                            ref={emailRef}
+                            placeholder='John'
+                            type='text'
+                            value={name}
+                            onChange={(e)=>{setName(e.target.value)}}
                             className='bg-neutral-800 text-sm mt-2 outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md'
+                            required
                         />
                     </div>
                     <div className='w-2/3'>
-                        <label htmlFor="maidenName" className='font-medium'>Madien Name</label>
+                        <label htmlFor="middleName" className='font-medium'>Madien Name</label>
                         <input 
-                            placeholder='hello@gmail.com'
-                            type='email'
-                            ref={emailRef}
+                            placeholder='Singh'
+                            type='text'
+                            value={middleName}
+                            onChange={(e)=>{setmiddleName(e.target.value)}}
                             className='bg-neutral-800 text-sm mt-2 outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md'
                         />
                     </div>
                     <div className='w-2/3'>
                         <label htmlFor="lastName" className='font-medium'>Last Name</label>
                         <input 
-                            placeholder='hello@gmail.com'
-                            type='email'
-                            ref={emailRef}
+                            placeholder='Doe'
+                            type='text'
+                            value={lastName}
+                            onChange={(e)=>{setLastName(e.target.value)}}
+                            className='bg-neutral-800 text-sm mt-2 outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md'
+                        />
+                    </div>
+                    <div className='w-2/3'>
+                        <label htmlFor="lastName" className='font-medium'>Roll Number</label>
+                        <input 
+                            placeholder='24BCS001'
+                            type='text'
+                            value={lastName}
+                            onChange={(e)=>{setLastName(e.target.value)}}
                             className='bg-neutral-800 text-sm mt-2 outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md'
                         />
                     </div>
@@ -49,8 +84,10 @@ const Signup = () => {
                         <input 
                             placeholder='hello@gmail.com'
                             type='email'
-                            ref={emailRef}
+                            value={email}
+                            onChange={(e)=>{setEmail(e.target.value)}}
                             className='bg-neutral-800 text-sm mt-2 outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md'
+                            required
                         />
                     </div>
                     <div className='w-2/3'>
@@ -58,15 +95,23 @@ const Signup = () => {
                         <input 
                             placeholder=''
                             type='password'
-                            ref={passwordRef}
+                            value={password}
+                            onChange={(e)=>{setPassword(e.target.value)}}
                             className='bg-neutral-800 text-sm mt-2 outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md'
+                            required
                         />
                     </div>
                     <div className='w-2/3'>
                         <label htmlFor="branch" className='font-medium'>Branch</label>
-                        <select name="Role" className='w-full bg-neutral-800 rounded-md px-2 py-1 mt-2'>
+                        <select 
+                            name="Role" 
+                            className='w-full bg-neutral-800 rounded-md px-2 py-1 mt-2'
+                            value={branch}
+                            onChange={(e)=>{setBranch(e.target.value)}}
+                            required
+                        >
                         {branches.map((branch, i)=>{
-                            return (<option className='rounded-md  px-2 py-1 ' value={branch}>{branch}</option>)
+                            return (<option className='rounded-md px-2 py-1' value={branch} key={i}>{branch}</option>)
                         })}
                         </select>
                     </div>
