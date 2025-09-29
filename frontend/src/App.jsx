@@ -14,6 +14,8 @@ import SuperAdmin from "./pages/superAdmin";
 import CreateAdmin from "./pages/createAdmin";
 import FaqSection from "./components/FaqSection";
 import Footer from "./pages/footer";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 
 
 
@@ -27,6 +29,8 @@ function App() {
               <Route path="admin/createform" element={<CreateForm/>}></Route>
               <Route path="/superadmin" element={<SuperAdmin/>}></Route>
               <Route path="/superadmin/viewadmin" element={<CreateAdmin/>}></Route>
+              <Route path="/login" element={<Login/>}></Route>
+              <Route path="/signup" element={<Signup/>}></Route>
               <Route path="/*" element={<Error/>}></Route>        
       </Routes>
       <FaqSection />  
