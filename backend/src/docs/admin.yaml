@@ -1,10 +1,16 @@
 openapi: "3.0.0"
 info:
   title: Admin Routes
-  version: 1.0.0
+  version: 2.0.0
   description: |
     Endpoints for Admin functionality including user approvals, email allotment, 
     form creation/publishing, and question management.
+    
+    Authentication uses JWT tokens stored in httpOnly cookies:
+    - accessToken: Short-lived token (15 minutes)
+    - refreshToken: Long-lived token (7 days)
+    
+    Access tokens are automatically refreshed using refresh tokens when expired.
 
 servers:
   - url: http://localhost:5000
@@ -16,7 +22,7 @@ paths:
       summary: Get pending users
       description: Fetches users who are `emailVerified = true`, `emailAlloted = false` and `status = PENDING or REJECTED`.
       security:
-        - userCookie: []
+        - cookieAuth: []
       responses:
         '200':
           description: Users fetched successfully
@@ -36,34 +42,36 @@ paths:
                         email: { type: string, example: "user@example.com" }
                         status: { type: string, example: "PENDING" }
         '401':
-          description: Unauthorized - No valid admin cookie
+          description: Unauthorized - Invalid or missing access token
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message: { type: string, example: "Unauthorized" }
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - User is not a SuperAdmin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
         '500':
           description: Server error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message: { type: string, example: "Some error occurred" }
+                $ref: '#/components/schemas/ServerError'
 
   /admin/approveUser/{id}:
     patch:
       summary: Approve a user
-      description: Approves a user by setting status = APPROVED.
+      description: Approves a user by setting status = APPROVED. Requires SuperAdmin role.
       security:
-        - userCookie: []
+        - cookieAuth: []
       parameters:
         - in: path
           name: id
           schema: { type: string }
           required: true
-          description: UUID of the user
+          description: UUID of the user to approve
       responses:
         '200':
           description: User approved successfully
@@ -86,6 +94,18 @@ paths:
                 type: object
                 properties:
                   message: { type: string, example: "Invalid user ID" }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - SuperAdmin only
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
         '500':
           description: Server error while approving user
           content:
@@ -98,9 +118,9 @@ paths:
   /admin/allotEmail/{id}:
     patch:
       summary: Allot email to approved user
-      description: Marks a user’s `emailAlloted = true`. Only allowed if user is `APPROVED`.
+      description: Marks a user's `emailAlloted = true`. Only allowed if user is `APPROVED`. Requires SuperAdmin role.
       security:
-        - userCookie: []
+        - cookieAuth: []
       parameters:
         - in: path
           name: id
@@ -129,6 +149,18 @@ paths:
                 type: object
                 properties:
                   message: { type: string, example: "Email is not approved yet" }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - SuperAdmin only
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
         '404':
           description: User not found
           content:
@@ -149,15 +181,17 @@ paths:
   /admin/createForm:
     post:
       summary: Create a new form
-      description: Creates a form and sets a `form` cookie containing the form ID.
+      description: Creates a form and sets a `form` cookie containing the form ID. Requires SuperAdmin role.
       security:
-        - userCookie: []
+        - cookieAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - formName
               properties:
                 formName: { type: string, example: "Admission Form 2025" }
       responses:
@@ -169,6 +203,11 @@ paths:
                 type: object
                 properties:
                   message: { type: string, example: "Form created successfully" }
+                  form:
+                    type: object
+                    properties:
+                      id: { type: string, example: "form-uuid-123" }
+                      formName: { type: string, example: "Admission Form 2025" }
         '400':
           description: Missing formName or invalid user
           content:
@@ -177,6 +216,18 @@ paths:
                 type: object
                 properties:
                   message: { type: string, example: "FormName is required" }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - SuperAdmin only
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
         '500':
           description: Failed to create form
           content:
@@ -189,9 +240,9 @@ paths:
   /admin/publishForm:
     post:
       summary: Publish a form
-      description: Publishes the form stored in the `form` cookie. Only one form can be live at a time.
+      description: Publishes the form stored in the `form` cookie. Only one form can be live at a time. Requires SuperAdmin role.
       security:
-        - userCookie: []
+        - cookieAuth: []
         - formCookie: []
       responses:
         '200':
@@ -202,14 +253,31 @@ paths:
                 type: object
                 properties:
                   message: { type: string, example: "Form is live now" }
+                  form:
+                    type: object
+                    properties:
+                      id: { type: string, example: "form-uuid-123" }
+                      isPublished: { type: boolean, example: true }
         '400':
-          description: Another form is already live
+          description: Another form is already live or no form cookie
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   message: { type: string, example: "Another form is live" }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - SuperAdmin only
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
         '500':
           description: Failed to publish form
           content:
@@ -222,9 +290,9 @@ paths:
   /admin/addQuestion:
     post:
       summary: Add a question to form
-      description: Adds a question to the form specified in the `form` cookie.
+      description: Adds a question to the form specified in the `form` cookie. Requires SuperAdmin role.
       security:
-        - userCookie: []
+        - cookieAuth: []
         - formCookie: []
       requestBody:
         required: true
@@ -232,15 +300,23 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - question
+                - type
+                - required
               properties:
                 question: { type: string, example: "What is your name?" }
-                type: { type: string, example: "TEXT" }
+                type: 
+                  type: string
+                  enum: [TEXT, TEXTAREA, NUMBER, EMAIL, DATE, SELECT, RADIO, CHECKBOX, FILE]
+                  example: "TEXT"
                 required: { type: boolean, example: true }
                 options:
                   type: array
                   items:
                     type: string
                   example: ["Option 1", "Option 2"]
+                  description: Required for SELECT, RADIO, and CHECKBOX types
       responses:
         '201':
           description: Question added successfully
@@ -255,6 +331,8 @@ paths:
                     properties:
                       id: { type: string, example: "question-uuid-123" }
                       question: { type: string, example: "What is your name?" }
+                      type: { type: string, example: "TEXT" }
+                      required: { type: boolean, example: true }
         '400':
           description: Invalid question data
           content:
@@ -263,6 +341,18 @@ paths:
                 type: object
                 properties:
                   message: { type: string, example: "Invalid question payload" }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - SuperAdmin only
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
         '500':
           description: Failed to add question
           content:
@@ -275,9 +365,9 @@ paths:
   /admin/deleteQuestion/{id}:
     delete:
       summary: Delete a question
-      description: Deletes a question by ID, ensuring it belongs to the form in the `form` cookie.
+      description: Deletes a question by ID, ensuring it belongs to the form in the `form` cookie. Requires SuperAdmin role.
       security:
-        - userCookie: []
+        - cookieAuth: []
         - formCookie: []
       parameters:
         - in: path
@@ -294,6 +384,10 @@ paths:
                 type: object
                 properties:
                   message: { type: string, example: "Question deleted successfully" }
+                  deletedQuestion:
+                    type: object
+                    properties:
+                      id: { type: string, example: "question-uuid-123" }
         '400':
           description: Invalid question or form ID
           content:
@@ -302,6 +396,18 @@ paths:
                 type: object
                 properties:
                   message: { type: string, example: "Invalid question ID" }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - SuperAdmin only
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
         '404':
           description: Question not found
           content:
@@ -321,13 +427,67 @@ paths:
 
 components:
   securitySchemes:
-    userCookie:
+    cookieAuth:
       type: apiKey
       in: cookie
-      name: user
-      description: Authentication cookie for admin identification
+      name: accessToken
+      description: |
+        JWT access token stored in httpOnly cookie. 
+        Automatically refreshed using refreshToken cookie when expired.
+        Contains: { userId, email, userRole }
     formCookie:
       type: apiKey
       in: cookie
       name: form
       description: Cookie to track current form being created or edited
+
+  schemas:
+    UnauthorizedError:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+            - "Access token required"
+            - "Invalid access token"
+            - "Session expired. Please login again."
+            - "Unauthorized access"
+          example: "Access token required"
+        error:
+          type: string
+          enum:
+            - "ACCESS_TOKEN_INVALID"
+            - "REFRESH_TOKEN_INVALID"
+          example: "ACCESS_TOKEN_INVALID"
+
+    ForbiddenError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Access denied: SuperAdmin only"
+
+    ServerError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Some error occurred"
+        error:
+          type: string
+          example: "Internal server error"
+
+  responses:
+    UnauthorizedError:
+      description: Authentication token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedError'
+    
+    ForbiddenError:
+      description: User does not have required permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForbiddenError'

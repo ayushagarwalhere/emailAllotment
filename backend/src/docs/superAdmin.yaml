@@ -1,16 +1,27 @@
 openapi: "3.0.0"
 info:
   title: SuperAdmin Routes
-  version: 1.0.1
-  description: SuperAdmin Endpoints for admin management and system administration
+  version: 2.0.0
+  description: |
+    SuperAdmin Endpoints for admin management and system administration.
+    
+    Authentication uses JWT tokens stored in httpOnly cookies:
+    - accessToken: Short-lived token (15 minutes)
+    - refreshToken: Long-lived token (7 days)
+    
+    All endpoints require SuperAdmin role.
+
+servers:
+  - url: http://localhost:5000
+    description: Local development server
 
 paths:
   /superadmin/createAdmin:
     post:
       summary: Create a new admin
-      description: Creates a new admin user (only accessible by super admins)
+      description: Creates a new admin user. Only accessible by SuperAdmins.
       security:
-        - userCookie: []
+        - cookieAuth: []
       requestBody:
         description: Admin user object
         required: true
@@ -18,6 +29,10 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - username
+                - email
+                - password
               properties:
                 username:
                   type: string
@@ -28,6 +43,7 @@ paths:
                   example: "admin@example.com"
                 password:
                   type: string
+                  minLength: 8
                   example: "securePassword123"
                 firstName:
                   type: string
@@ -35,10 +51,6 @@ paths:
                 lastName:
                   type: string
                   example: "Doe"
-              required:
-                - username
-                - email
-                - password
       responses:
         '200':
           description: Admin created successfully
@@ -53,6 +65,18 @@ paths:
                   jobId:
                     type: string
                     example: "job-uuid-12345"
+                  admin:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "admin-uuid-123"
+                      username:
+                        type: string
+                        example: "admin_user"
+                      email:
+                        type: string
+                        example: "admin@example.com"
         '400':
           description: Bad request - Invalid admin data
           content:
@@ -60,29 +84,21 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     example: "Invalid admin data or username/email already exists"
         '401':
-          description: Unauthorized - Invalid or missing super admin cookie
+          description: Unauthorized
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Unauthorized access"
+                $ref: '#/components/schemas/UnauthorizedError'
         '403':
-          description: Forbidden - User is not a super admin
+          description: Forbidden - SuperAdmin only
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Access denied. Super admin privileges required"
+                $ref: '#/components/schemas/ForbiddenError'
         '409':
           description: Conflict - Admin with this email already exists
           content:
@@ -90,7 +106,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     example: "Admin with this email already exists"
         '500':
@@ -100,69 +116,80 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     example: "Error while creating admin"
 
   /superadmin/admins:
     get:
       summary: Get all admins
-      description: Retrieves a list of all admin users (only accessible by super admins)
+      description: Retrieves a list of all admin users. Only accessible by SuperAdmins.
       security:
-        - userCookie: []
+        - cookieAuth: []
       responses:
         '200':
           description: List of all admins
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    username:
-                      type: string
-                    email:
-                      type: string
-                    firstName:
-                      type: string
-                    lastName:
-                      type: string
-                    role:
-                      type: string
-                      example: "ADMIN"
-                    isApproved:
-                      type: boolean
-                    isVerified:
-                      type: boolean
-                    createdAt:
-                      type: string
-                      format: date-time
-                    updatedAt:
-                      type: string
-                      format: date-time
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Admins retrieved successfully"
+                  count:
+                    type: integer
+                    example: 5
+                  admins:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "admin-uuid-123"
+                        username:
+                          type: string
+                          example: "admin_user"
+                        email:
+                          type: string
+                          example: "admin@example.com"
+                        firstName:
+                          type: string
+                          example: "John"
+                        lastName:
+                          type: string
+                          example: "Doe"
+                        role:
+                          type: object
+                          properties:
+                            role:
+                              type: string
+                              example: "ADMIN"
+                        isApproved:
+                          type: boolean
+                          example: true
+                        isVerified:
+                          type: boolean
+                          example: true
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
         '401':
-          description: Unauthorized - Invalid or missing super admin cookie
+          description: Unauthorized
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Unauthorized access"
+                $ref: '#/components/schemas/UnauthorizedError'
         '403':
-          description: Forbidden - User is not a super admin
+          description: Forbidden - SuperAdmin only
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Access denied. Super admin privileges required"
+                $ref: '#/components/schemas/ForbiddenError'
         '500':
           description: Internal server error
           content:
@@ -170,23 +197,24 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     example: "Failed to retrieve admins"
 
   /superadmin/deleteAdmin/{id}:
     delete:
       summary: Delete an admin
-      description: Deletes an admin user by ID (only accessible by super admins)
+      description: Deletes an admin user by ID. Only accessible by SuperAdmins.
+      security:
+        - cookieAuth: []
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
+            format: uuid
           description: Admin user ID to delete
-      security:
-        - userCookie: []
       responses:
         '200':
           description: Admin deleted successfully
@@ -198,9 +226,15 @@ paths:
                   message:
                     type: string
                     example: "Admin deleted successfully"
-                  deletedAdminId:
-                    type: string
-                    example: "admin-uuid-12345"
+                  deletedAdmin:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "admin-uuid-12345"
+                      email:
+                        type: string
+                        example: "admin@example.com"
         '400':
           description: Bad request - Invalid admin ID
           content:
@@ -208,29 +242,21 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     example: "Invalid admin ID"
         '401':
-          description: Unauthorized - Invalid or missing super admin cookie
+          description: Unauthorized
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Unauthorized access"
+                $ref: '#/components/schemas/UnauthorizedError'
         '403':
-          description: Forbidden - User is not a super admin
+          description: Forbidden - SuperAdmin only
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Access denied. Super admin privileges required"
+                $ref: '#/components/schemas/ForbiddenError'
         '404':
           description: Admin not found
           content:
@@ -238,7 +264,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     example: "Admin not found"
         '500':
@@ -248,14 +274,43 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
+                  message:
                     type: string
                     example: "Failed to delete admin"
 
 components:
   securitySchemes:
-    userCookie:
+    cookieAuth:
       type: apiKey
       in: cookie
-      name: user
-      description: Authentication cookie for super admin identification and authorization
+      name: accessToken
+      description: |
+        JWT access token stored in httpOnly cookie. 
+        Automatically refreshed using refreshToken cookie when expired.
+        Requires SuperAdmin role: { userId, email, userRole: "SUPERADMIN" }
+
+  schemas:
+    UnauthorizedError:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+            - "Access token required"
+            - "Invalid access token"
+            - "Session expired. Please login again."
+            - "Unauthorized access"
+          example: "Access token required"
+        error:
+          type: string
+          enum:
+            - "ACCESS_TOKEN_INVALID"
+            - "REFRESH_TOKEN_INVALID"
+          example: "ACCESS_TOKEN_INVALID"
+
+    ForbiddenError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Access denied: SuperAdmin only"

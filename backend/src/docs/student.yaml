@@ -201,7 +201,314 @@ paths:
                 properties:
                   error:
                     type: string
+                    example: "No previous submission founopenapi: "3.0.0"
+info:
+  title: Student Routes
+  version: 2.0.0
+  description: |
+    Student Endpoints for form submission, status checking, and resubmission.
+    
+    Authentication uses JWT tokens stored in httpOnly cookies:
+    - accessToken: Short-lived token (15 minutes)
+    - refreshToken: Long-lived token (7 days)
+    
+    All endpoints require authenticated student users.
+
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /students/submit:
+    post:
+      summary: Submit email verification form
+      description: Allows an authenticated student to submit answers to a form.
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: Form submission object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - formId
+                - answers
+              properties:
+                formId:
+                  type: string
+                  format: uuid
+                  example: "form-uuid-123"
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - questionId
+                      - response
+                    properties:
+                      questionId:
+                        type: string
+                        format: uuid
+                        example: "question-uuid-456"
+                      response:
+                        type: string
+                        example: "My answer to the question"
+      responses:
+        '200':
+          description: Form submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Form submitted successfully"
+                  submission:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "submission-uuid-789"
+                      formId:
+                        type: string
+                        example: "form-uuid-123"
+                      userId:
+                        type: string
+                        example: "user-uuid-101"
+                      submittedAt:
+                        type: string
+                        format: date-time
+                      status:
+                        type: string
+                        example: "PENDING"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: Form not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Form not found"
+        '409':
+          description: Conflict - already submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "You have already submitted the form"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Some error occurred"
+
+  /students/status:
+    get:
+      summary: Get student status
+      description: Retrieves the approval status of the logged-in student.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [PENDING, APPROVED, REJECTED]
+                    example: "PENDING"
+                  user:
+                    type: object
+                    properties:
+                      userId:
+                        type: string
+                        example: "user-uuid-123"
+                      email:
+                        type: string
+                        example: "student@example.com"
+                      emailAlloted:
+                        type: boolean
+                        example: false
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Failed to retrieve status"
+
+  /students/resubmit:
+    put:
+      summary: Resubmit a form
+      description: Allows a student to resubmit a form with updated answers if status is REJECTED.
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: Updated form submission object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - formId
+                - answers
+              properties:
+                formId:
+                  type: string
+                  format: uuid
+                  example: "form-uuid-123"
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - questionId
+                      - response
+                    properties:
+                      questionId:
+                        type: string
+                        format: uuid
+                        example: "question-uuid-456"
+                      response:
+                        type: string
+                        example: "Updated answer to the question"
+      responses:
+        '200':
+          description: Form resubmitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Form resubmitted successfully"
+                  updatedSubmission:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "submission-uuid-789"
+                      formId:
+                        type: string
+                        example: "form-uuid-123"
+                      userId:
+                        type: string
+                        example: "user-uuid-101"
+                      resubmittedAt:
+                        type: string
+                        format: date-time
+                      status:
+                        type: string
+                        example: "PENDING"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        '403':
+          description: Forbidden - cannot resubmit unless rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cannot resubmit. Current status is APPROVED"
+        '404':
+          description: No previous submission or user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
                     example: "No previous submission found"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Failed to resubmit form"
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: accessToken
+      description: |
+        JWT access token stored in httpOnly cookie. 
+        Automatically refreshed using refreshToken cookie when expired.
+        Contains: { userId, email, userRole: "STUDENT" }
+
+  schemas:
+    UnauthorizedError:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+            - "Access token required"
+            - "Invalid access token"
+            - "Session expired. Please login again."
+            - "User not authenticated"
+          example: "Access token required"
+        error:
+          type: string
+          enum:
+            - "ACCESS_TOKEN_INVALID"
+            - "REFRESH_TOKEN_INVALID"
+          example: "ACCESS_TOKEN_INVALID"d"
         "500":
           description: Internal server error
 
