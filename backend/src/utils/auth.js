@@ -79,20 +79,6 @@ export function setAccessTokenCookie(res, token) {
   });
 }
 
-export async function handleOtpVerification(email, otpKey, dataKey) {
-  const storedOtp = await getAsync(otpKey);
-  if (!storedOtp || storedOtp !== email.otp) {
-    throw new Error("Invalid or expired OTP");
-  }
-  const dataStr = await getAsync(dataKey);
-  if (!dataStr) {
-    throw new Error("Data expired or not found");
-  }
-  await delAsync(otpKey);
-  await delAsync(dataKey);
-  return JSON.parse(dataStr);
-}
-
 
 export const verifyOTP_func = async (email, otpEntered) => {
   try {

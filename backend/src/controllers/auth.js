@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { delAsync, getAsync, prisma, setAsync } from "../config/db.js";
+import { prisma, setAsync } from "../config/db.js";
 import { generateOtp } from "../utils/generate-otp.js";
 import {
   signinschema,
@@ -8,7 +8,7 @@ import {
   sendOTPschema,
 } from "../zod-schema/auth.js";
 import { sendEmails } from "../queues/emailQueue.js";
-import { setAccessTokenCookie, setRefreshTokenCookie, handleOtpVerification, storeRefreshToken, generateTokens, verifyOTP_func } from "../utils/auth.js";
+import { setAccessTokenCookie, setRefreshTokenCookie, storeRefreshToken, generateTokens, verifyOTP_func } from "../utils/auth.js";
 
 const OTP_EXPIRATION = parseInt(process.env.OTP_EXPIRATION) || 300;
 
@@ -50,43 +50,6 @@ export const signup = async (req, res) => {
   }
 };
 
-// Signup OTP verification
-// export const verifySignupOtp = async (req, res) => {
-//   const { email, otp } = req.body;
-//   try {
-//     const signupData = await handleOtpVerification(
-//       email,
-//       `signup-otp:${email}`,
-//       `signup:${email}`,
-//     );
-//     const role = await prisma.role.findUnique({ where: { role: "STUDENT" } });
-//     if (!role) {
-//       return res.status(500).json({ error: "Student role not found" });
-//     }
-//     const hashedPassword = await bcrypt.hash(signupData.password, 10);
-//     const user = await prisma.user.create({
-//       data: {
-//         name: signupData.name,
-//         email: signupData.email,
-//         password: hashedPassword,
-//         roleId: role.id,
-//         emailVerified: true,
-//       },
-//       include: { role: true },
-//     });
-//     const { accessToken, refreshToken } = generateTokens(user);
-//     await storeRefreshToken(user.id, refreshToken);
-//     setRefreshTokenCookie(res, refreshToken);
-//     res.status(200).json({
-//       message: "Signup OTP verified, account created",
-//       user,
-//       accessToken,
-//     });
-//   } catch (error) {
-//     console.error("Signup OTP verification error:", error);
-//     res.status(500).json({ error: error.message });
-//   }
-// };
 
 // Login handler
 export const signin = async (req, res) => {
