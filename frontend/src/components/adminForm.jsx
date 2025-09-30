@@ -1,18 +1,41 @@
+adminForm.jsx
+
+
 import { useState } from "react";
 import InputPlace from "./inputPlace";
+import axios from 'axios';
 
 function AdminForm() {
+    const navigate = useNavigator();
     const [name, setName] = useState("");
+    const [middleName, setMiddleName]= useState("");
+    const [lastName, setLastName]= useState("");
     const [email, setEmail] = useState("");
-    const [rollNumber, setRollNumber] = useState("");
     const [branch, setBranch] = useState("");
-    const [role, setRole] = useState("");
     const [password, setPassword] = useState("");
+    const branches = [
+        "CS", "DCS", "EC", "DEC", "EE", "ME", "MNC", "CH", "CE", "EP", "CH", "MS"
+    ]
 
-    const onSubmit = (e) => {
+    const onSubmit = async(e) => {
         e.preventDefault();
-        // TODO: wire to backend once available
-        console.log({ name, email, rollNumber, branch, role, password });
+            const user = {
+            name,
+            middlename : middleName,
+            lastname: lastName,
+            email,
+            branch,
+            password,
+        }
+        try {
+            const response = await axios.post('/api/superaAdmin/createAdmin', user);
+            console.log(response);
+            alert("Admin created successfully");
+            navigate('/superadmin');
+        } catch (error) {
+            console.error(error);
+        }
+        
     };
 
     return(
@@ -21,29 +44,51 @@ function AdminForm() {
             <form onSubmit={onSubmit} className="space-y-3 sm:space-y-4">
                 <div>
                     <label className="block text-sm font-medium mb-1">Name</label>
-                    <InputPlace placeholder="Enter name" value={name} onChange={(e)=>setName(e.target.value)} />
+                    <InputPlace 
+                        placeholder="Enter name" 
+                        value={name} 
+                        onChange={(e)=>setName(e.target.value)} 
+                        required
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Middle Name</label>
+                    <InputPlace 
+                        placeholder="Enter name" 
+                        value={middleName} 
+                        onChange={(e)=>setMiddleName(e.target.value)} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Last Name</label>
+                    <InputPlace 
+                        placeholder="Enter name" 
+                        value={lastName} 
+                        onChange={(e)=>setLastName(e.target.value)} />
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium mb-1">Email</label>
-                    <InputPlace type="email" placeholder="Enter email" value={email} onChange={(e)=>setEmail(e.target.value)} />
+                    <InputPlace 
+                        type="email" 
+                        placeholder="Enter email" 
+                        value={email} 
+                        onChange={(e)=>setEmail(e.target.value)} 
+                        required
+                    />
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium mb-1">Branch</label>
-                    <select
-                        className="w-full px-3 py-2 bg-gray-200 text-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                <div>         
+                    <label htmlFor="branch" className='font-medium'>Branch</label>
+                    <select 
+                        name="Role" 
+                        className='w-full bg-neutral-800 rounded-md px-2 py-1 mt-2'
                         value={branch}
-                        onChange={(e)=>setBranch(e.target.value)}
+                        onChange={(e)=>{setBranch(e.target.value)}}
+                        required
                     >
-                        <option value="">Select branch</option>
-                        <option value="CSE">CSE</option>
-                        <option value="ECE">ECE</option>
-                        <option value="EEE">EE</option>
-                        <option value="ME">ME</option>
-                        <option value="Civil Engineering">Civil Engineering</option>
-                        <option value="Architechure">Architechure</option>
-                        <option value="Chemical Engineering">Chemical Engineering</option>
+                    {branches.map((branch, i)=>{
+                        return (<option className='rounded-md px-2 py-1' value={branch} key={i}>{branch}</option>)
+                    })}
                     </select>
                 </div>
 

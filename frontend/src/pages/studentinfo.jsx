@@ -1,32 +1,25 @@
+studentinfo.jsx
+
 import NavbarAdmin from "../components/navbarAdmin";
 import Button from "../components/Button"; 
 import Dropdown from "../components/dropdown";
 import StudentCard from "../components/studentcards";
 import Footer from "./footer";
+import { useEffect, useState } from "react";
 
 function StudentInfo(){
-   const students=[
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-        {name:"Emily",roll:"24BXX000"},
-    ];
+
+    const [students, setStudents] = useState([]);
+    const [count, setCount] = useState(0);
+
+    useEffect(()=>{
+        const getStudents = async()=>{
+            const response = await axios.get("/api/admin");
+            setStudents(response.data.users);
+            setCount(response.data.count);
+        }
+        getStudents();
+    },[])
    
     return(
         <div className="min-h-screen overflow-hidden">
