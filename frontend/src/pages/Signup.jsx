@@ -1,5 +1,6 @@
-import React, { use, useRef, useState } from "react";
+import React, {  useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const Signup = () => {
    const navigate = useNavigate();
@@ -37,7 +38,7 @@ const Signup = () => {
       branch,
     };
     try {
-      const response = await axios.post("/api/student/signup", user);
+      const response = await axios.post("http://localhost:5000/signup", user);
       localStorage.setItem("email", email);
       navigate("/verify-otp");
       console.log(response);

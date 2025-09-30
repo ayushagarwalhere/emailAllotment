@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const VerifyOTP = () => {
     const navigate = useNavigate();
@@ -32,6 +33,9 @@ const VerifyOTP = () => {
             />
             <button type="submit">Verify</button>
         </form>
+        {errorMsg && (
+          <h1>{errorMsg}</h1>
+        )}
       </div>
     </div>
   )
