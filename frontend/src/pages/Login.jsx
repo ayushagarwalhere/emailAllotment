@@ -1,16 +1,19 @@
 import React, { useState } from 'react'
-
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [role, setRole] = useState("Student");
 
     const handleOnSubmit = async(e)=>{
     e.preventDefault();
-    console.log({ name, middleName, lastName, email, password, branch });
     const user = {
       email,
       password,
+      role
     };
     try {
       const response = await axios.post("/api/student/login", user);
@@ -18,7 +21,7 @@ const Login = () => {
       navigate("/verify-otp");
       console.log(response);
     } catch (error) {
-        onsole.error(error);
+        console.error(error);
     }
     }
   return (
@@ -49,10 +52,10 @@ const Login = () => {
                         />
                         <a href="" className=''>Forgot Your <span className='underline underline-offset-1'>Password</span>?</a>
                     </div>
-                    <select name="Role" ref={roleRef} className='w-2/3 bg-neutral-800 rounded-md px-2 py-1 mt-2'>
-                        <option className='rounded-md px-2 py-1 ' value="Student">Student</option>
-                        <option className='rounded-md px-2 py-1' value="Admin">Admin</option>
-                        <option className='rounded-md px-2 py-1' value="Super Admin">Super Admin</option>
+                    <select name="Role" value={role} onChange={(e)=>{setRole(e.target.value)}} className='w-2/3 bg-neutral-800 rounded-md px-2 py-1 mt-2'>
+                        <option className='rounded-md px-2 py-1 ' value="STUDENT">Student</option>
+                        <option className='rounded-md px-2 py-1' value="ADMIN">Admin</option>
+                        <option className='rounded-md px-2 py-1' value="SUPERADMIN">Super Admin</option>
                     </select>
                     <button type="submit" className='bg-white w-2/3 rounded-md px-3 py-1 font-medium text-black'>Login</button>
                     <h1>Don't have a account? <span className='underline underline-offset-1 text-sm'>SignUp</span></h1>
