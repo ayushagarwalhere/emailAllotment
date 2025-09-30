@@ -1,6 +1,3 @@
-adminForm.jsx
-
-
 import { useState } from "react";
 import InputPlace from "./inputPlace";
 import axios from 'axios';

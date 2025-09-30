@@ -1,5 +1,3 @@
-studentinfo.jsx
-
 import NavbarAdmin from "../components/navbarAdmin";
 import Button from "../components/Button"; 
 import Dropdown from "../components/dropdown";

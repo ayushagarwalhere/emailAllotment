@@ -1,5 +1,3 @@
-createAdmin.jsx
-
 import NavbarAdmin from "../components/navbarAdmin";
 import Dropdown from "../components/dropdown";
 import AdminCard from "../components/adminCard";
