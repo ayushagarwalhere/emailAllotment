@@ -8,6 +8,7 @@ import CreateForm from "./pages/createform";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SuperAdmin from "./pages/superAdmin";
+import Test from "./pages/Test";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/superadmin/viewadmin" element={<CreateAdmin />}></Route>
         <Route path="/login" element={<Login />}></Route>
         <Route path="/signup" element={<Signup />}></Route>
+        <Route path="/test" element={<Test />}></Route>
         <Route path="/*" element={<Error />}></Route>
       </Routes>
     </BrowserRouter>
