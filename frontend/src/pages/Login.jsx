@@ -1,12 +1,25 @@
-import React, { useRef } from 'react'
+import React, { useState } from 'react'
 
 
 const Login = () => {
-    const emailRef = useRef();
-    const passwordRef = useRef();
-    const roleRef = useRef();
-    const handleOnSubmit = ()=>{
-        console.log("submitted");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const handleOnSubmit = async(e)=>{
+    e.preventDefault();
+    console.log({ name, middleName, lastName, email, password, branch });
+    const user = {
+      email,
+      password,
+    };
+    try {
+      const response = await axios.post("/api/student/login", user);
+      localStorage.setItem("email", email);
+      navigate("/verify-otp");
+      console.log(response);
+    } catch (error) {
+        onsole.error(error);
+    }
     }
   return (
     <div className='h-screen w-full flex'>
@@ -20,7 +33,8 @@ const Login = () => {
                         <input 
                             placeholder='hello@gmail.com'
                             type='email'
-                            ref={emailRef}
+                            value={email}
+                            onChange={(e)=>{setEmail(e.target.value)}}
                             className='bg-neutral-800 text-sm outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md'
                         />
                     </div>
@@ -29,7 +43,8 @@ const Login = () => {
                         <input 
                             placeholder=''
                             type='password'
-                            ref={passwordRef}
+                            value={password}
+                            onChange={(e)=>{setPassword(e.target.value)}}
                             className='bg-neutral-800 text-sm outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md'
                         />
                         <a href="" className=''>Forgot Your <span className='underline underline-offset-1'>Password</span>?</a>

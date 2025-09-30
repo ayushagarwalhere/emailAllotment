@@ -1,11 +1,14 @@
-import React, { useRef, useState } from "react";
+import React, { use, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
+   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [middleName, setmiddleName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
+  const [rollNumber, setRollNumber] = useState("");
   const [branch, setBranch] = useState("CS");
   const branches = [
     "CS",
@@ -36,6 +39,7 @@ const Signup = () => {
     try {
       const response = await axios.post("/api/student/signup", user);
       localStorage.setItem("email", email);
+      navigate("/verify-otp");
       console.log(response);
     } catch (error) {
       console.error(error);
@@ -105,9 +109,9 @@ const Signup = () => {
               <input
                 placeholder="24BCS001"
                 type="text"
-                value={lastName}
+                value={rollNumber}
                 onChange={(e) => {
-                  setLastName(e.target.value);
+                  setRollNumber(e.target.value);
                 }}
                 className="bg-neutral-800 text-sm mt-2 outline-neutral-500 outline-1 px-2 py-1 w-full rounded-md"
               />
