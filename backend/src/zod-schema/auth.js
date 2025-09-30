@@ -47,10 +47,6 @@ export const signinschema = z.object({
 });
 
 export const verifyOtpschema = z.object({
-  email: z.email({
-    required_error: "Email is required",
-    message: "Valid email is required",
-  }),
   otp: z
     .string({
       required_error: "OTP is required",
@@ -59,9 +55,3 @@ export const verifyOtpschema = z.object({
     .length(6),
 });
 
-export const sendOTPschema = z.object({
-  email: z.email({
-    required_error: "Email is required",
-    message: "Valid email is required",
-  }),
-});

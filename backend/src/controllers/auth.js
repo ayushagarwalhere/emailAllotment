@@ -10,6 +10,8 @@ import {
 // import { sendEmails } from "../queues/emailQueue.js";
 import { setAccessTokenCookie, setRefreshTokenCookie, storeRefreshToken, generateTokens, verifyOTP_func } from "../utils/auth.js";
 import { RoleType } from "@prisma/client";
+import sendMail from "../utils/sendEmail.js";
+import { validUuid } from "../zod-schema/form.js";
 
 const OTP_EXPIRATION = process.env.OTP_EXPIRATION|| 300; //in ms
 
@@ -42,12 +44,16 @@ export const signup = async (req, res) => {
           connect: { role: "STUDENT" }  // must match Role.role enum value
         }
       },
+      select:{
+        id:true,
+        email:true
+      }
     });
     console.log(user);
-    await sendOTP(email);
+    await sendOTP(user);
     res
       .status(200)
-      .json({ message: "OTP sent to your email for signup verification." });
+      .json({ message: "OTP sent to your email for signup verification.", id: user.id });
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ error: error.message });
@@ -65,6 +71,7 @@ export const login = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { email, emailVerified: true },
+      select:{id}
     });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -73,7 +80,8 @@ export const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ error: "Invalid password" });
     }
-    await sendOTP(email);
+    console.log(user.id);
+    await sendOTP(user.id);
     return res.status(200).json({ message: "Password verified OTP verification left" });
   } catch (error) {
     console.error("Login error:", error);
@@ -81,34 +89,13 @@ export const login = async (req, res) => {
   }
 };
 
-// export const sendOTP = async(email)=>{ 
-//   try {
-//     const {hashedOTP, otp} = await generateOtp();
-//     console.log(otp);
-//     await setAsync(email, hashedOTP, OTP_EXPIRATION);
-//     const mail = {
-//       toWhom: email,
-//       subject: "Your OTP for Login",
-//       msg: {
-//         title : "Login OTP",
-//         message : `Your OTP is ${otp}. It is valid for ${OTP_EXPIRATION/60} minutes.`,
-//       },
-//     };
-//     const job = await sendEmails(mail);
-//     return {
-//       jodId:job.id, 
-//       message: "OTP sent successfully"
-//     };
-//   } catch (error) {
-//     console.error("OTP sending error:", error);
-//     throw new Error("Internal server error");
-//   }
-// }
 
-export const sendOTP = async (email) => {
+export const sendOTP = async (user) => {
+  const {email, id} = user;
   try {
     const { hashedOTP, otp } = await generateOtp();
-    await setAsync(email, hashedOTP, OTP_EXPIRATION);
+    console.log(otp);
+    await setAsync(id, hashedOTP, OTP_EXPIRATION);
 
     const mail = {
       toWhom: email,
@@ -137,8 +124,13 @@ export const verifyOTP = async(req, res)=>{
   if(!verifyOTP.success){
     return res.status(400).json({error: verifyOTP.error.issues[0].message});
   }
-  const {email, otp} = verifyOTP.data;
-  const isValid = await verifyOTP_func(email, otp);
+  const userId = validUuid.safeParse(req.params.id);
+  if(!id.success){
+    return res.status(401).json({error: id.message});
+  }
+  const {id} = userId.data;
+  const {otp} = verifyOTP.data;
+  const isValid = await verifyOTP_func(id, otp);
   if(!isValid){
     return res.status(401).json({error: "Invalid or expired OTP"});
   }

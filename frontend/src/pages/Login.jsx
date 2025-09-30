@@ -16,7 +16,7 @@ const Login = () => {
       role
     };
     try {
-      const response = await axios.post("/api/student/login", user);
+      const response = await axios.post("api/login", user);
       localStorage.setItem("email", email);
       navigate("/verify-otp");
       console.log(response);

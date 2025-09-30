@@ -31,7 +31,7 @@ app.use(
 );
 
 app.use("/health-check", rateLimiterMiddleware, healthCheckRoute);
-app.use('/', routes);
+app.use('/auth', routes);
 app.use('/admin', adminRoutes);
 app.use('/superadmin', superAdminRoutes);
 app.use("/students", studentRoutes);

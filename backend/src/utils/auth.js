@@ -80,9 +80,9 @@ export function setAccessTokenCookie(res, token) {
 }
 
 
-export const verifyOTP_func = async (email, otpEntered) => {
+export const verifyOTP_func = async (id, otpEntered) => {
   try {
-    const otp = await getAsync(email);
+    const otp = await getAsync(id);
     if (!otp) {
       throw new Error("OTP Expired or Invalid");
     }
@@ -92,7 +92,7 @@ export const verifyOTP_func = async (email, otpEntered) => {
       throw new Error("Invalid OTP");
     }
 
-    await delAsync(email);
+    await delAsync(id);
     return true;
   } catch (error) {
     console.error("OTP verification error:", error);

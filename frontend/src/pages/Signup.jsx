@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 const Signup = () => {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [middleName, setmiddleName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -11,6 +11,7 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [rollNumber, setRollNumber] = useState("");
   const [branch, setBranch] = useState("CS");
+  const [error,setError] = useState("")
   const branches = [
     "CS",
     "DCS",
@@ -38,12 +39,15 @@ const Signup = () => {
       branch,
     };
     try {
-      const response = await axios.post("http://localhost:5000/signup", user);
-      localStorage.setItem("email", email);
-      navigate("/verify-otp");
+      const response = await axios.post("/auth/signup", user);
+      navigate(`/verify-otp/?id=${response.data.id}`);
       console.log(response);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      if (err.response) {
+        setError(err.response.data.error);
+      } else {
+        setError("Signup failed. Please try again.");
+      }
     }
   };
   return (
@@ -51,11 +55,14 @@ const Signup = () => {
       <div className="w-1/2 h-full bg-neutral-950 text-white">
         <div className="flex flex-col gap-3 items-center justify-center w-full h-full py-5">
           <h1 className="w-full text-center font-bold text-2xl">
-            Login to your account
+            Create your account
           </h1>
           <p className="w-full text-center text-neutral-400">
-            Login to Online Email Allotment System by NITH
+            Signup to Online Email Allotment System by NITH
           </p>
+          {error && (
+            <h1 className="text-red text-lg font-medium">{error}</h1>
+          )}
           <form
             onSubmit={handleOnSubmit}
             className="flex flex-col gap-5 w-full items-center justify-around "
@@ -77,7 +84,7 @@ const Signup = () => {
             </div>
             <div className="w-2/3">
               <label htmlFor="middleName" className="font-medium">
-                Madien Name
+                Middle Name
               </label>
               <input
                 placeholder="Doe"
@@ -104,7 +111,7 @@ const Signup = () => {
               />
             </div>
             <div className="w-2/3">
-              <label htmlFor="lastName" className="font-medium">
+              <label htmlFor="rollNumber" className="font-medium">
                 Roll Number
               </label>
               <input
