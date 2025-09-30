@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
 import InutPlace from "../components/inputPlace";
 import InfoCard from "../components/InfoCard";
-import Footer from "./footer";
+import Footer from "../components/footer";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -19,7 +19,7 @@ function Dashboard(){
                 console.error("Error fetching status:", error);
             }
         }
-        
+
         fetchStatus();
     }, [])
 
@@ -29,11 +29,8 @@ function Dashboard(){
         <h1 className='text-3xl font-medium'>Hello, {studentName}</h1>
         <h2 className="text-1xl font-medium mb-8 px-5 ">welcome to your student portal.View your information and submit your email allotement request.</h2>
         <h1>Your current form status is <span className='font-medium'>{status}</span></h1>
-       <InfoCard  ></InfoCard>
-       {/*  */}  
-        
-        
-       
+        <InfoCard></InfoCard>
+        <Footer/>
     </div>
 }
     export default Dashboard

@@ -1,6 +1,4 @@
-import AdminForm from "../components/adminForm";
-import NavbarAdmin from "../components/navbarAdmin";
-import Footer from "./footer";       
+import AdminForm from "../components/adminForm";  
 
 function SuperAdmin() {
     return(

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import NavbarAdmin from "../components/navbarAdmin";
 import InputPlace from "../components/inputPlace";
-import Footer from "./footer";
+import Footer from "../components/footer";
 
 function CreateForm(){
     const [questions, setQuestions] = useState([]);
@@ -131,7 +131,7 @@ function CreateForm(){
                     </div>
                 </div>
             </div>
-            
+            <Footer/>
         </div>
     )
 }

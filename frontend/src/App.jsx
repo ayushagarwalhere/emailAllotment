@@ -3,11 +3,8 @@ import Error from "./pages/404";
 import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
 import StudentInfo from "./pages/studentinfo";
-
-import FaqSection from "./components/FaqSection";
 import CreateAdmin from "./pages/createAdmin";
 import CreateForm from "./pages/createform";
-import Footer from "./pages/footer";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SuperAdmin from "./pages/superAdmin";
@@ -26,8 +23,6 @@ function App() {
         <Route path="/signup" element={<Signup />}></Route>
         <Route path="/*" element={<Error />}></Route>
       </Routes>
-      <FaqSection />
-      <Footer></Footer>
     </BrowserRouter>
   );
 }

@@ -1,8 +1,5 @@
 import NavbarAdmin from "../components/navbarAdmin";
-import Button from "../components/Button"; 
-import Dropdown from "../components/dropdown";
 import StudentCard from "../components/studentcards";
-import Footer from "./footer";
 import { useState } from "react";
 import axios from "axios";
 

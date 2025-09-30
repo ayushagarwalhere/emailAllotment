@@ -1,8 +1,5 @@
-import NavbarAdmin from "../components/navbarAdmin";
-import Dropdown from "../components/dropdown";
 import AdminCard from "../components/adminCard";
 import NithNav from "../components/nithnav";
-import Footer from "./footer";
 import { useEffect, useState } from "react";
 
 function CreateAdmin(){
