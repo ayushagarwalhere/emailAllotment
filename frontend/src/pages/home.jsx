@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Button from "../components/Button";
 import FaqSection from "../components/FaqSection";
 import Navbar from "../components/Navbar";
@@ -23,8 +24,8 @@ function Home() {
             Email ID and access campus services{" "}
           </h2>
           <div className="flex gap-5 mt-10 z-10">
-            <Button variant="primary"> Login</Button>
-            <Button variant="secondary">Sign Up</Button>
+            <Link to="/login"><Button variant="primary"> Login</Button></Link>
+            <Link to="/signup"><Button variant="secondary">Sign Up</Button></Link>
           </div>
           <div className="w-full fixed top-0 left-0 font-medium ">
             <Navbar></Navbar>

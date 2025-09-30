@@ -23,14 +23,18 @@ function Dashboard(){
         fetchStatus();
     }, [])
 
-    return <div className="min-h-screen w-full flex flex-col items-center">
-        <Navbar></Navbar>
-        <h1 className="text-4xl font-bold pb-2 mt-15">User Dashboard</h1>
-        <h1 className='text-3xl font-medium'>Hello, {studentName}</h1>
-        <h2 className="text-1xl font-medium mb-8 px-5 ">welcome to your student portal.View your information and submit your email allotement request.</h2>
-        <h1>Your current form status is <span className='font-medium'>{status}</span></h1>
-        <InfoCard></InfoCard>
-        <Footer/>
-    </div>
+    return (
+        <>
+            <div className="min-h-screen w-full flex flex-col items-center">
+                <Navbar></Navbar>
+                <h1 className="text-4xl font-bold pb-2 mt-15">User Dashboard</h1>
+                <h1 className='text-3xl font-medium'>Hello, {studentName}</h1>
+                <h2 className="text-1xl font-medium mb-8 px-5 ">welcome to your student portal.View your information and submit your email allotement request.</h2>
+                <h1>Your current form status is <span className='font-medium'>{status}</span></h1>
+                <InfoCard></InfoCard>
+            </div>
+            <Footer/>
+        </>)
+    
 }
     export default Dashboard

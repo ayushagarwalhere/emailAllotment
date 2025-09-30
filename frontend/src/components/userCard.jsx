@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 
-export default function UserCard({id, name= "John",middlename="", lastname="", email="hello@gmail.com", branch="CSE", role="Student", status}){
+export default function UserCard({id, name= "John",middlename="", lastname="",rollno, email="hello@gmail.com", branch="CSE", role="Student", status}){
     const [isOpen, setIsOpen] = useState(false);
     const approveUser = async()=>{
         try {
@@ -45,6 +45,7 @@ export default function UserCard({id, name= "John",middlename="", lastname="", e
                         <div className="mt-5 flex flex-col gap-2">
                             <h1 className="font-semibold text-2xl">{`Role: ${role} `}</h1>
                             <h1 className=" text-xl">{`Email: ${email} `}</h1>
+                            <h1 className=" text-xl">{`Roll No.: ${rollno} `}</h1>
                             <h1 className=" text-xl">{`Branch: ${branch} `}</h1>
                             <h1 className=" text-xl">{`Status: ${status} `}</h1>
                             <h1>Other details...</h1>
