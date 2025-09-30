@@ -53,16 +53,19 @@ const submitForm = async (req, res) => {
 // Get Student Status
 const status = async (req, res) => {
   try {
-    const userId = req.cookies.userId;
+    const userId = req.user?.userId;
     if (!userId) return res.status(401).json({ error: "User not authenticated" });
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { status: true }
+      select: { 
+        name: true,
+        status: true 
+      }
     });
     if (!user) return res.status(401).json({ error: "User not found" });
 
-    res.status(200).json({ status: user.status });
+    res.status(200).json({ status: user.status, name: user.name });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -72,7 +75,7 @@ const status = async (req, res) => {
 const resubmit = async (req, res) => {
   try {
     const { formId, answers } = req.body;
-    const userId = req.cookies.userId;
+    const userId = req.user?.userId;
 
     if (!userId) return res.status(401).json({ error: "User not authenticated" });
 
