@@ -4,22 +4,41 @@ import { questionSchema, validBranch, validUuid } from '../zod-schema/form.js';
 
 //User-route controllers
 const getUser = async(req,res)=>{
-    try {
-        const users = await prisma.user.findMany({
-            where :{
-                emailVerified : true,
-                emailAlloted : false,
-                status: {
-                    in: [Status.PENDING, Status.REJECTED]
-                }
+    const {branch, emailStatus} = req.query;
+
+    const branchValidation = validBranch.safeParse(branch);
+    if(!branchValidation.success){
+        return res.status(400).json({message : branchValidation.error.message});
+    }
+
+    if(emailStatus && !['all', 'pending', 'approved', 'rejected'].includes(emailStatus)){
+        return res.status(400).json({message : "Invalid email status filter"});
+    }
+
+    const filter = {};
+    if(branch && branch !== 'all'){
+        filter.branch = branch;
+    }
+    if(emailStatus && emailStatus !== 'all'){
+        if(emailStatus === 'pending'){
+            filter.status = {
+                in: [Status.PENDING, Status.REJECTED]
             }
-        })
+        } else if(emailStatus === 'approved'){
+            filter.status = Status.APPROVED;
+        } else if(emailStatus === 'rejected'){
+            filter.status = Status.REJECTED;
+        }
+    }
+    
+    try{
+        const users = await prisma.user.findMany({ where: filter });
         return res.status(200).json({
-            message: users.length ? "Users fetched" : "No pending users found for this branch",
+            message: users.length ? "Users fetched" : "No users found for this branch",
             count : users.length,
             users
         })
-    } catch (err) {
+    }catch (err) {
         console.error("An error occured", err);
         return res.status(500).json({message: "Some error occured"});
     }
@@ -77,44 +96,44 @@ const allotEmail = async(req,res)=>{
     }
 }
 
-const getVerifiedUsers = async(req,res)=>{
-    try {
-        const users = await prisma.user.findMany({
-            where :{
-                emailVerified : true,
-                emailAlloted : true,
-                status: Status.APPROVED
-            }
-        }) 
-        return res.status(200).json({
-            message: users.length ? "Users fetched" : "No approved users found for this branch",
-            count : users.length,
-            users
-        })
-    } catch (err) {
-        console.error("An error occured", err);
-        return res.status(500).json({message: "Error while fetching verified users"});
-    }
-}
+// const getVerifiedUsers = async(req,res)=>{
+//     try {
+//         const users = await prisma.user.findMany({
+//             where :{
+//                 emailVerified : true,
+//                 emailAlloted : true,
+//                 status: Status.APPROVED
+//             }
+//         }) 
+//         return res.status(200).json({
+//             message: users.length ? "Users fetched" : "No approved users found for this branch",
+//             count : users.length,
+//             users
+//         })
+//     } catch (err) {
+//         console.error("An error occured", err);
+//         return res.status(500).json({message: "Error while fetching verified users"});
+//     }
+// }
 
-const getRejectedUsers = async(req,res)=>{
-    try {
-        const users = await prisma.user.findMany({
-            where :{
-                emailVerified : true,
-                status: Status.REJECTED
-            }
-        })
-        return res.status(200).json({
-            message: users.length ? "Users fetched" : "No rejected users found for this branch",
-            count : users.length,
-            users
-        })
-    } catch (err) {
-        console.error("An error occured", err);
-        return res.status(500).json({message: "Error while fetching rejected users"});
-    }
-}
+// const getRejectedUsers = async(req,res)=>{
+//     try {
+//         const users = await prisma.user.findMany({
+//             where :{
+//                 emailVerified : true,
+//                 status: Status.REJECTED
+//             }
+//         })
+//         return res.status(200).json({
+//             message: users.length ? "Users fetched" : "No rejected users found for this branch",
+//             count : users.length,
+//             users
+//         })
+//     } catch (err) {
+//         console.error("An error occured", err);
+//         return res.status(500).json({message: "Error while fetching rejected users"});
+//     }
+// }
 
 //Question-route controllers
 const addQuestion =  async(req,res)=>{
@@ -331,4 +350,4 @@ const getForm = async(req,res)=>{
     }
 }
 
-export {getUser, approveUser, allotEmail, getVerifiedUsers, getRejectedUsers, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm};
+export {getUser, approveUser, allotEmail, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm};

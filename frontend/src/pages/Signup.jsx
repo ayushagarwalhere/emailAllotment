@@ -147,12 +147,10 @@ const Signup = () => {
                 Branch
               </label>
               <select
-                name="Role"
+                name="Branch"
                 className="w-full bg-neutral-800 rounded-md px-2 py-1 mt-2"
                 value={branch}
-                onChange={(e) => {
-                  setBranch(e.target.value);
-                }}
+                onChange={(e) => {setBranch(e.target.value);}}
                 required
               >
                 {branches.map((branch, i) => {

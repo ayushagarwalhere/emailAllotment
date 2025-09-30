@@ -9,8 +9,8 @@ import { isLoggedIn } from "../middlewares/isLoggedIn.js";
 router.get('/users', isLoggedIn, IsAdmin, getUser);
 router.post('/approveUser/:id', isLoggedIn, IsAdmin, approveUser);
 router.post('/allotEmail/:id', isLoggedIn, IsAdmin, allotEmail);
-router.get('/verifiedUsers', isLoggedIn, IsAdmin, getVerifiedUsers);
-router.get('/rejectedUsers', isLoggedIn, IsAdmin, getRejectedUsers);
+// router.get('/verifiedUsers', isLoggedIn, IsAdmin, getVerifiedUsers);
+// router.get('/rejectedUsers', isLoggedIn, IsAdmin, getRejectedUsers);
 
 //Question routes
 router.post('/addQuestion', isLoggedIn, IsAdmin, addQuestion);
@@ -20,7 +20,7 @@ router.delete('/deleteQuestion/:id', isLoggedIn, IsAdmin, deleteQuestion);
 //Form routes
 router.post('/createForm', isLoggedIn, IsAdmin, createForm);
 router.post('/publishForm/:id', isLoggedIn, IsAdmin, publishForm);
-router.delete('/deleteForm/:id', IisLoggedIn, sAdmin, deleteForm);
+router.delete('/deleteForm/:id', isLoggedIn, IsAdmin, deleteForm);
 router.get('/forms', isLoggedIn, IsAdmin, getAllForms);
 router.get('/form/:id', isLoggedIn, IsAdmin, getForm);
 
