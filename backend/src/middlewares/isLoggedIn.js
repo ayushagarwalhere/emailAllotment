@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken');
 import jwt from 'jsonwebtoken';
 import { generateTokens, setAccessTokenCookie } from '../controllers/auth';
 
@@ -19,7 +18,7 @@ export const isLoggedIn = async (req, res, next) => {
     }
     try {
       const decoded = jwt.verify(accessToken, ACCESS_TOKEN_SECRET);
-      // Store user information in request object
+      // Storing user info in request object
       req.user = {
         userId: decoded.userId,
         email: decoded.email,
