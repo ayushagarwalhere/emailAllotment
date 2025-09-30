@@ -1,5 +1,5 @@
-import prisma from '../config/prismaClient.js';
 import { Status } from '@prisma/client';
+import { prisma } from '../config/db.js';
 
 
 //  Student Form Submission

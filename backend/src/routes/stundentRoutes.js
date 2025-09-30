@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { submitForm, status, resubmit } from "../controllers/studentEndpoint.js";
+import { status, resubmit, submitForm } from "../controllers/studentEndpoint.js";
 import IsStudent from "../middlewares/isStudent.js";
 import { isLoggedIn } from "../middlewares/isLoggedIn.js";
 

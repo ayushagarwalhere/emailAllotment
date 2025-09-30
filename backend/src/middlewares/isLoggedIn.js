@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { generateTokens, setAccessTokenCookie } from '../controllers/auth';
+import { generateTokens, setAccessTokenCookie } from '../utils/auth.js';
 
 // Configuration - store these in environment variables
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;

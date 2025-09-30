@@ -1,4 +1,4 @@
-import prisma from '../config/prismaClient.js';
+import {prisma} from '../config/db.js';
 import { RoleType } from '@prisma/client';
 
 const isAdmin = async (req, res, next) => {

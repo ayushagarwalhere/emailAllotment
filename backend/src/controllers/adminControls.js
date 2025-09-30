@@ -1,4 +1,4 @@
-import prisma from '../config/prismaClient.js';
+import { prisma } from '../config/db.js';
 import { Status } from '@prisma/client';
 import { questionSchema, validBranch, validUuid } from '../zod-schema/form.js';
 

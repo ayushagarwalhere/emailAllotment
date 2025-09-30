@@ -23,6 +23,11 @@ export const questionSchema = z.object({
 
 export const validUuid = z.uuid({message: "Invalid uuid"})
 
+export const validBranch = z
+        .enum(["CSE", "DCS", "MNC", "EC", "DEC", "ME", "EE", "CE", "EP" ,"MS", "CH"], {
+            error: ()=>({message: "Enter a valid branch"})
+    })
+
 export const createAdminSchema = z.object({
     name : z
         .string()

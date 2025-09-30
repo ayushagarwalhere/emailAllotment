@@ -1,7 +1,7 @@
 import { RoleType } from "@prisma/client";
-import prisma from "../config/prismaClient";
-import { createAdminSchema, validUuid } from "../zod-schema/form";
-import { addAdmins, deleteAdmins } from "../queues/superAdminQueue";
+import { prisma } from '../config/db.js';
+import { createAdminSchema, validUuid } from "../zod-schema/form.js";
+import { addAdmins, deleteAdmins } from "../queues/superAdminQueue.js";
 
 const getAllAdmins = async (req, res) => {
     try {

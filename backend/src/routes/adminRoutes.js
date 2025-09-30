@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 const router = Router();
-import {getUser, approveUser, allotEmail, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm} from '../controllers/adminControls.js'
+import {getUser, approveUser, allotEmail, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm } from '../controllers/adminControls.js'
 import IsAdmin from '../middlewares/isAdmin.js';
 import { isLoggedIn } from "../middlewares/isLoggedIn.js";
 
