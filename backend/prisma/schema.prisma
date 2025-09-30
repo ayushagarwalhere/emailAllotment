@@ -15,6 +15,7 @@ model User {
   email         String        @unique
   password      String
   branch        Branch
+  rollNumber    String?
   roleId        String        @db.Uuid
   role          Role          @relation(fields: [roleId], references: [id])
   form          Form?

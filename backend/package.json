@@ -4,8 +4,11 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node ./index.js",
+    "dev": "nodemon ./index.js",
     "test": "jest"
+  },
+    "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",

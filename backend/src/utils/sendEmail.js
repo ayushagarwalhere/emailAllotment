@@ -8,15 +8,20 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export default sendMail = async(toWhom, subject, message)=> {
+export const sendMail = async (toWhom, subject, msg) => {
+  if (!msg?.title || !msg?.message) {
+    throw new Error('Invalid message object. Requires {title, message}');
+  }
+
   const info = await transporter.sendMail({
     from: process.env.YOUR_EMAIL_ID,
     to: toWhom,
     subject,
-    html: `<h3>${message.title}</h3><p>${message.message}</p>`,
+    html: `<h3>${msg.title}</h3><p>${msg.message}</p>`,
   });
 
   console.log('Email sent: %s', info.messageId);
-}
+  return info;
+};
 
-
+export default sendMail

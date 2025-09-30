@@ -1,7 +1,8 @@
 import { RoleType } from "@prisma/client";
 import { prisma } from '../config/db.js';
 import { createAdminSchema, validUuid } from "../zod-schema/form.js";
-import { addAdmins, deleteAdmins } from "../queues/superAdminQueue.js";
+import bcrypt from "bcryptjs";
+// import { addAdmins, deleteAdmins } from "../queues/superAdminQueue.js";
 
 const getAllAdmins = async (req, res) => {
     try {
@@ -37,15 +38,38 @@ const createAdmin = async (req, res) => {
             error: admin.error.message
         });
     }
+    const { name,middlename, lastname, branch, email, password } = admin.data;
+    const hashedPassword = await bcrypt.hash(password, 10);
     try {
-        const existingAdmin = await prisma.user.findUnique({ where: { email : admin.data.email } });
+        const existingAdmin = await prisma.user.findUnique({ where: { email } });
         if (existingAdmin) {
             return res.status(409).json({ message: "Admin with this email already exists" });
         }
-        const job = await addAdmins(admin.data);
+        const newAdmin = await prisma.user.create({
+            data: {
+                name,
+                middlename,
+                lastname,
+                branch,
+                email,
+                password : hashedPassword,
+                role: RoleType.ADMIN,
+            },
+            select: {
+                id: true,
+                name: true,
+                name : true,
+                branch : true,
+                email: true,
+                role: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+
         return res.status(200).json({ 
             message: "Admin created successfully",
-            jobId : job.id,
+            newAdmin
          });
     } catch (err) {
         console.error("An error occurred", err);
@@ -60,26 +84,21 @@ const deleteAdmin = async (req, res) => {
         return res.status(400).json({ message: "Invalid admin ID" });
     }
     try {
-        const admin = await prisma.user.findFirst({
-            where: { 
-                id: adminId.data,
+        const admin = await prisma.user.deleteMany({
+            where :{
+                id : adminId.data.id,
                 role: RoleType.ADMIN
             },
-            select: { 
-                id: true, 
+            select:{
                 email: true,
-                name : true,
             }
-        });
-
-        if (!admin) {
-            return res.status(404).json({ message: "Admin not found" });
+        })
+        if(!admin || admin.count===0){
+            res.status(404).json("Admin not found")
         }
-        const job = await deleteAdmins(admin);
         return res.status(200).json({ 
             message: "Admin deleted successfully",
-            adminId : admin.data.id,
-            jobId : job.id,
+            adminId : adminId.data.id,
             email : admin.email,
          });
     } catch (err) {

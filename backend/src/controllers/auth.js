@@ -7,10 +7,11 @@ import {
   verifyOtpschema,
   sendOTPschema,
 } from "../zod-schema/auth.js";
-import { sendEmails } from "../queues/emailQueue.js";
+// import { sendEmails } from "../queues/emailQueue.js";
 import { setAccessTokenCookie, setRefreshTokenCookie, storeRefreshToken, generateTokens, verifyOTP_func } from "../utils/auth.js";
+import { RoleType } from "@prisma/client";
 
-const OTP_EXPIRATION = parseInt(process.env.OTP_EXPIRATION) || 300;
+const OTP_EXPIRATION = process.env.OTP_EXPIRATION|| 300; //in ms
 
 
 // Signup handler
@@ -27,7 +28,7 @@ export const signup = async (req, res) => {
     if (existingUser) {
       return res.status(409).json({ error: "Email already in use" });
     }
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name,
         middleName,
@@ -37,9 +38,12 @@ export const signup = async (req, res) => {
         rollNumber,
         branch: branch,
         emailVerified: false,
+        role: {
+          connect: { role: "STUDENT" }  // must match Role.role enum value
+        }
       },
     });
-  
+    console.log(user);
     await sendOTP(email);
     res
       .status(200)
@@ -52,7 +56,7 @@ export const signup = async (req, res) => {
 
 
 // Login handler
-export const signin = async (req, res) => {
+export const login = async (req, res) => {
   const isValid = signinschema.safeParse(req.body);
   if (!isValid.success) {
     return res.status(400).json({ error: isValid.error.issues[0].message });
@@ -77,28 +81,56 @@ export const signin = async (req, res) => {
   }
 };
 
-export const sendOTP = async(email)=>{ 
+// export const sendOTP = async(email)=>{ 
+//   try {
+//     const {hashedOTP, otp} = await generateOtp();
+//     console.log(otp);
+//     await setAsync(email, hashedOTP, OTP_EXPIRATION);
+//     const mail = {
+//       toWhom: email,
+//       subject: "Your OTP for Login",
+//       msg: {
+//         title : "Login OTP",
+//         message : `Your OTP is ${otp}. It is valid for ${OTP_EXPIRATION/60} minutes.`,
+//       },
+//     };
+//     const job = await sendEmails(mail);
+//     return {
+//       jodId:job.id, 
+//       message: "OTP sent successfully"
+//     };
+//   } catch (error) {
+//     console.error("OTP sending error:", error);
+//     throw new Error("Internal server error");
+//   }
+// }
+
+export const sendOTP = async (email) => {
   try {
-    const {hashedOTP, otp} = await generateOtp();
+    const { hashedOTP, otp } = await generateOtp();
     await setAsync(email, hashedOTP, OTP_EXPIRATION);
+
     const mail = {
       toWhom: email,
-      subject: "Your OTP for Login",
+      subject: 'Your OTP for Login',
       msg: {
-        title : "Login OTP",
-        message : `Your OTP is ${otp}. It is valid for ${OTP_EXPIRATION/60} minutes.`,
+        title: 'Login OTP',
+        message: `Your OTP is ${otp}. It is valid for ${OTP_EXPIRATION / 60} minutes.`,
       },
     };
-    const job = await sendEmails(mail);
+    const info = await sendMail(mail.toWhom, mail.subject, mail.msg);
+
+    console.log(`OTP email sent successfully to ${email}. Message ID: ${info.messageId}`);
+
     return {
-      jodId:job.id, 
-      message: "OTP sent successfully"
+      otp,
+      message: 'OTP sent successfully',
     };
   } catch (error) {
-    console.error("OTP sending error:", error);
-    throw new Error("Internal server error");
+    console.error('Error sending OTP:', error);
+    throw new Error('Failed to send OTP');
   }
-}
+};
 
 export const verifyOTP = async(req, res)=>{
   const verifyOTP = verifyOtpschema.safeParse(req.body);
