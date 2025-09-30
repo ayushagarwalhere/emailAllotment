@@ -19,6 +19,7 @@ function Dashboard(){
                 console.error("Error fetching status:", error);
             }
         }
+        
         fetchStatus();
     }, [])
 
