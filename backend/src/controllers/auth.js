@@ -110,10 +110,10 @@ export const sendOTP = async (user) => {
         message: `Your OTP is ${otp}. It is valid for ${OTP_EXPIRATION / 60} minutes.`,
       },
     };
-    const info = await sendEmail(mail.toWhom, mail.subject, mail.msg);
+    const info = await sendEmail(otp, mail.toWhom);
 
     console.log(
-      `OTP email sent successfully to ${email}. Message ID: ${info.messageId}`,
+      `OTP email sent successfully to ${email}. Message ID: ${info.message}`,
     );
 
     return {

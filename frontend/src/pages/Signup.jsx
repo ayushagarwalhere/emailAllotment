@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -58,7 +59,7 @@ const Signup = () => {
     };
 
     try {
-      const response = await axios.post("/auth/signup", user);
+      const response = await axios.post("http://localhost:5000/auth/signup", user);
       if (typeof window !== "undefined") {
         window.location.assign(`/verify-otp/?id=${response.data.id}`);
       }
@@ -310,12 +311,12 @@ const Signup = () => {
 
             <p className="text-sm text-center text-neutral-300">
               Already have an account?{" "}
-              <a
-                href="/login"
+              <Link
+                to="/login"
                 className="underline underline-offset-2 hover:text-white"
               >
                 Login
-              </a>
+              </Link>
             </p>
           </form>
         </div>

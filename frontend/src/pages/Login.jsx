@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -16,7 +16,7 @@ const Login = () => {
       role
     };
     try {
-      const response = await axios.post("api/login", user);
+      const response = await axios.post("http://localhost:5000/auth/login", user);
       localStorage.setItem("email", email);
       navigate("/verify-otp");
       console.log(response);
@@ -58,7 +58,7 @@ const Login = () => {
                         <option className='rounded-md px-2 py-1' value="SUPERADMIN">Super Admin</option>
                     </select>
                     <button type="submit" className='bg-white w-2/3 rounded-md px-3 py-1 font-medium text-black'>Login</button>
-                    <h1>Don't have a account? <span className='underline underline-offset-1 text-sm'>SignUp</span></h1>
+                    <h1>Don't have a account? <Link to='/signup' className='underline underline-offset-1 text-sm'>SignUp</Link></h1>
                 </form>
             </div>
         </div>
