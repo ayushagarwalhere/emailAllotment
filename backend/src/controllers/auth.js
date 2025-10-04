@@ -113,7 +113,7 @@ export const sendOTP = async (user) => {
     const info = await sendEmail(otp, mail.toWhom);
 
     console.log(
-      `OTP email sent successfully to ${email}. Message ID: ${info.message}`,
+      `OTP email sent successfully to ${email}`,
     );
 
     return {

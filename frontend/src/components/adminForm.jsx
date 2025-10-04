@@ -79,7 +79,7 @@ function AdminForm() {
                     <label htmlFor="branch" className='font-medium'>Branch</label>
                     <select 
                         name="Role" 
-                        className='w-full bg-neutral-800 rounded-md px-2 py-1 mt-2'
+                        className='w-full bg-neutral-200 rounded-md px-2 py-1 mt-2'
                         value={branch}
                         onChange={(e)=>{setBranch(e.target.value)}}
                         required

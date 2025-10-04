@@ -3,7 +3,7 @@ import NithNav from "../components/nithnav";
 import { useEffect, useState } from "react";
 import axios from 'axios';
 
-function GetAdmins(){
+function AllAdmins(){
     const [admins, setAdmins] = useState([]);
     const [count, setCount] = useState(0);
 
@@ -41,4 +41,4 @@ function GetAdmins(){
     )
 }
 
-export default GetAdmins;
+export default AllAdmins;
