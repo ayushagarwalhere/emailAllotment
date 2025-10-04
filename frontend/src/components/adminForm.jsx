@@ -1,9 +1,10 @@
 import { useState } from "react";
 import InputPlace from "./inputPlace";
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 function AdminForm() {
-    const navigate = useNavigator();
+    const navigate = useNavigate();
     const [name, setName] = useState("");
     const [middleName, setMiddleName]= useState("");
     const [lastName, setLastName]= useState("");
@@ -25,7 +26,7 @@ function AdminForm() {
             password,
         }
         try {
-            const response = await axios.post('/api/superaAdmin/createAdmin', user);
+            const response = await axios.post('http://localhost:5000/superaAdmin/createAdmin', user);
             console.log(response);
             alert("Admin created successfully");
             navigate('/superadmin');

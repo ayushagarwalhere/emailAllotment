@@ -1,43 +1,37 @@
-import AdminCard from "../components/adminCard";
-import NithNav from "../components/nithnav";
-import { useEffect, useState } from "react";
+import React from 'react'
+import NavbarSuperAdmin from '../components/superAdminNavbar'
+import AdminForm from '../components/adminForm'
 
-function CreateAdmin(){
-    const [admins, setAdmins] = useState([]);
-    const [count, setCount] = useState(0);
-
-    useEffect(()=>{
-        const getAdmins = async()=>{
-            try {
-                const response = await axios.get('/superadmin');
-                console.log(response.data.message);
-                setCount(response.data.count);
-                setAdmins(response.data.admins)
-            } catch (error) {
-                console.error("Error while fetching admins", error)
-            }
-        }
-        getAdmins();
-    },[])
-
+const CreateAdmin = () => {
     return(
-        <div>
-            <NithNav></NithNav>
-            <div className="flex justify-between items-center gap-2 pr-8">
-                <div className="mt-19 mb-10 ml-10">
-                    <h1 className="font-bold text-3xl">Admins</h1>
-                    <h2>Manage and review admin users here</h2>
+        <>
+            <NavbarSuperAdmin/>
+            <div>
+                <nav className=" text-black px-4 py-2.5 fixed top-0 left-0 w-full z-50 ">
+                <div className="flex justify-between items-center gap-2 pr-8 ">
+                <a href="nith.ac.in" className="flex items-center gap-2">
+                    <img
+                    src="/src/assets/nithlogo.png"
+                    alt="NITH Logo"
+                    className="h-10 w-10"
+                    />
+                    <span className="text-black mt-1.5 font-bold text-[20px]">NIT Hamirpur</span>
+                </a> 
+                </div>   
+
+                
+            </nav>
+            <div className="min-h-screen w-full flex flex-col  p-4 sm:p-6 mt-11">
+                <div className="w-full max-w-3xl mx-auto">
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Super Admin</h1>
+                    <AdminForm />
                 </div>
             </div>
-
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 px-5 py-3">
-                    {count===0? (<h1 className="text-xl font-medium">No admins Found</h1>): (admins.map((admin, index) => (
-                        <AdminCard key={index} name={admin.name} role={admin.role.role} />
-                    )))}
+            
             </div>
-           
-        </div>
+        </>
+
     )
 }
 
-export default CreateAdmin;
+export default CreateAdmin
