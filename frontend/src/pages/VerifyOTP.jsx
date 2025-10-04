@@ -7,6 +7,7 @@ const VerifyOTP = () => {
     const location = useLocation();
     const [errorMsg, setErrorMsg] = useState('')
     const [otp,setOtp] = useState('');
+    
     const handleOnSubmit = async (e)=>{
         e.preventDefault();
         const queryParams = new URLSearchParams(location.search);

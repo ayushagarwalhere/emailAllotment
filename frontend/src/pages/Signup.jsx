@@ -26,6 +26,7 @@ const Signup = () => {
     "CH",
     "MS",
   ];
+  
   const handleOnSubmit = async (e) => {
     e.preventDefault();
     console.log({ name, middleName, lastName, email, password, branch });

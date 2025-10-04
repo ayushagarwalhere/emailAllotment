@@ -136,124 +136,166 @@ const allotEmail = async(req,res)=>{
 // }
 
 //Question-route controllers
-const addQuestion =  async(req,res)=>{
-    const result = questionSchema.safeParse(req.body);
-    if(!result.success){
-        return res.status(400).json({message : result.error.message});
-    }
+// const addQuestion =  async(req,res)=>{
+//     const result = questionSchema.safeParse(req.body);
+//     if(!result.success){
+//         return res.status(400).json({message : result.error.message});
+//     }
 
-    const {question, options, type, required = true, formId} = result.data;
+//     const {question, options, type, required = true, formId} = result.data;
 
-    try {
-        const newQuestion = await prisma.question.create({
-            data : {
-                question,
-                type,
-                required,
-                form : {connect : {id : formId}},
-                options: {
-                    create: options.map((option)=>({option}))
-                }
-            }
-        })
-        return res.status(201).json({message : "Question added successfully", newQuestion});
-    } catch (err) {
-        console.error("An error occured", err);
-        return res.status(500).json({message : "Failed to add question"});
-    }
-}
+//     try {
+//         const newQuestion = await prisma.question.create({
+//             data : {
+//                 question,
+//                 type,
+//                 required,
+//                 form : {connect : {id : formId}},
+//                 options: {
+//                     create: options.map((option)=>({option}))
+//                 }
+//             }
+//         })
+//         return res.status(201).json({message : "Question added successfully", newQuestion});
+//     } catch (err) {
+//         console.error("An error occured", err);
+//         return res.status(500).json({message : "Failed to add question"});
+//     }
+// }
 
-const editQuestions = async(req,res)=>{
-    const result = questionSchema.safeParse(req.body);
-    if(!result.success){
-        return res.status(400).json({message : result.error.message});
-    }
-    const {question, options, type, required = true, formId} = result.data;
-    const userId = validUuid.safeParse(req.params.id);
-    if(!userId.success){
-        return res.status(400).json({message: userId.error.message});
-    }
-    const {id}=  userId.data;
-    try {
-        const editedQuestion =  await prisma.question.update({
-            where: {id},
-            data: { 
-                question,
-                type,
-                required,
-                form : {connect : {id : formId}},
-                options: {
-                    deleteMany: {},
-                    create: options.map((option)=>({option}))
-                }
-            }
-        })
-        return res.status(200).json({message : "Question edited successfully", editedQuestion});
-    } catch (err) {
-        console.error("An error occured", err);
-        return res.status(500).json({message : "Failed to edit question"});
-    }
-}
+// const editQuestions = async(req,res)=>{
+//     const result = questionSchema.safeParse(req.body);
+//     if(!result.success){
+//         return res.status(400).json({message : result.error.message});
+//     }
+//     const {question, options, type, required = true, formId} = result.data;
+//     const userId = validUuid.safeParse(req.params.id);
+//     if(!userId.success){
+//         return res.status(400).json({message: userId.error.message});
+//     }
+//     const {id}=  userId.data;
+//     try {
+//         const editedQuestion =  await prisma.question.update({
+//             where: {id},
+//             data: { 
+//                 question,
+//                 type,
+//                 required,
+//                 form : {connect : {id : formId}},
+//                 options: {
+//                     deleteMany: {},
+//                     create: options.map((option)=>({option}))
+//                 }
+//             }
+//         })
+//         return res.status(200).json({message : "Question edited successfully", editedQuestion});
+//     } catch (err) {
+//         console.error("An error occured", err);
+//         return res.status(500).json({message : "Failed to edit question"});
+//     }
+// }
 
-const deleteQuestion = async(req, res)=>{
-    const questionId = validUuid.safeParse(req.params.id);
-    if(!questionId.success){
-        return res.status(400).json({message : questionId.error.message});
-    }
-    const {id} = questionId.data;
+// const deleteQuestion = async(req, res)=>{
+//     const questionId = validUuid.safeParse(req.params.id);
+//     if(!questionId.success){
+//         return res.status(400).json({message : questionId.error.message});
+//     }
+//     const {id} = questionId.data;
 
-    const formId = validUuid.safeParse(req.cookies.form.id);
-    if(!formId.success){
-        return res.status(400).json({message: formId.error.message});
-    }
+//     const formId = validUuid.safeParse(req.cookies.form.id);
+//     if(!formId.success){
+//         return res.status(400).json({message: formId.error.message});
+//     }
 
-    try {
-        const question = await prisma.question.deleteMany({
-            where: {
-                id,
-                formId: formId.data,
-            },
-        });
-        if(question.count === 0){
-            return res.status(404).json({message : "Question not found"})
-        }
-        return res.status(200).json({message : "Question deleted successfully"});
-    } catch (err) {
-        console.error("An error occured", err);
-        return res.status(500).json({message : "Failed to delete question"});
-    }
-}
+//     try {
+//         const question = await prisma.question.deleteMany({
+//             where: {
+//                 id,
+//                 formId: formId.data,
+//             },
+//         });
+//         if(question.count === 0){
+//             return res.status(404).json({message : "Question not found"})
+//         }
+//         return res.status(200).json({message : "Question deleted successfully"});
+//     } catch (err) {
+//         console.error("An error occured", err);
+//         return res.status(500).json({message : "Failed to delete question"});
+//     }
+// }
 
 //Form-route controllers
-const createForm = async(req,res)=>{
-    const {formName} = req.body;
-    if(!formName){
-        return res.status(400).json({message : "FormName is required"});
-    }
 
-    const userId = validUuid.safeParse(req.cookies.user.id);
+// const createForm = async(req,res)=>{
+// const {formName, questions} = req.body;
+//     if(!formName){
+//         return res.status(400).json({message : "FormName is required"});
+//     }
+
+//     const userId = validUuid.safeParse(req.cookies.user.id);
+//     if(!userId.success){
+//         return res.status(400).json({message : questionId.error.message});
+//     }
+//     const {id} = userId.data;
+//     try {
+//         const form = await prisma.form.create({
+//             data:{ 
+//                 formName,
+//                 user : {connect : {id}},
+                
+//             }
+//         })
+//         res.cookie("form", form.id,{
+//             httpOnly: true,
+//             secure: true,
+//             sameSite: "strict"
+//         });
+//         return res.status(201).json({message : "Form created successfully"});
+//     } catch (err) {
+//         console.error("An error occured", err);
+//         return res.status(500).json({message : "Failed to create form"});
+//     }
+// }
+
+export const createForm = async (req, res) => {
+  try {
+    const { formName, questions } = req.body;
+
+    const userId = validUuid.safeParse(req.user.id);
     if(!userId.success){
-        return res.status(400).json({message : questionId.error.message});
+        return res.status(400).json({message : userId.error.message});
     }
-    const {id} = userId.data;
-    try {
-        const form = await prisma.form.create({
-            data:{ 
-                formName,
-                user : {connect : {id}},
+    const newForm = await prisma.form.create({
+        data: {
+        formName,
+        connect:{
+            userId: userId.data
+        },
+        userId,
+        question: {
+            create: questions.map(q => ({
+            question: q.question,
+            type: q.type,
+            required: q.required,
+            options: {
+                create: q.options.map(o => ({ option: o.option }))
             }
-        })
-        res.cookie("form", form.id,{
-            httpOnly: true,
-            secure: true,
-            sameSite: "strict"
-        });
-        return res.status(201).json({message : "Form created successfully"});
-    } catch (err) {
-        console.error("An error occured", err);
-        return res.status(500).json({message : "Failed to create form"});
-    }
-}
+            }))
+        }
+        },
+        include: {
+        question: {
+            include: { options: true }
+        }
+        }
+    });
+
+    res.status(201).json(newForm);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+};
 
 const publishForm = async(req,res)=>{
     try {
