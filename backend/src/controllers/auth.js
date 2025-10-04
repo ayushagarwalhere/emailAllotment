@@ -126,20 +126,32 @@ export const sendOTP = async (user) => {
   }
 };
 
-const otpValidation = verifyOtpschema.safeParse(req.body);
-if (!otpValidation.success) {
-  return res.status(400).json({ error: otpValidation.error.issues[0].message });
-}
-const userIdValidation = validUuid.safeParse(req.params.id);
-if (!userIdValidation.success) {
-  return res.status(401).json({ error: userIdValidation.error.message });
-}
-const { id } = userIdValidation.data;
-const { otp } = otpValidation.data;
+export const verifyOTP = async (req, res) => {
+  try {
+    const otpValidation = verifyOtpschema.safeParse(req.body);
+    if (!otpValidation.success) {
+      return res.status(400).json({ error: otpValidation.error.issues[0].message });
+    }
 
-const user = await prisma.user.update({
-  where: { id },
-  data: { emailVerified: true },
-  select: { id: true, email: true, role: true },
-});
+    const userIdValidation = validUuid.safeParse(req.params.id);
+    if (!userIdValidation.success) {
+      return res.status(401).json({ error: userIdValidation.error.message });
+    }
+    const { id } = userIdValidation.data;
+    const { otp } = otpValidation.data;
+    const isValid = await verifyOTP_func(id, otp);
+    if (!isValid) {
+      return res.status(401).json({ error: "Invalid or expired OTP" });
+    }
+    const user = await prisma.user.update({
+      where: { id },
+      data: { emailVerified: true },
+      select: { id: true, email: true, role: true },
+    });
+    res.status(200).json({ message: "OTP verified successfully", user });
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
