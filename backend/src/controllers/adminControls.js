@@ -298,6 +298,15 @@ export const createForm = async (req, res) => {
 };
 
 const publishForm = async(req,res)=>{
+    const formId = validUuid.safeParse(req.params.id);
+    if(!formId.success){
+        return res.status(400).json({message: formId.error.message});
+    }
+    const userId = validUuid.safeParse(req.user.id );
+    if(!userId.success){
+        return res.status(400).json({message: formId.error.message});
+    }
+    
     try {
         const existingLive =  await prisma.form.findFirst({
             where : {isLive : true}
@@ -305,8 +314,11 @@ const publishForm = async(req,res)=>{
         if(existingLive) {
             return res.status(400).json({message : "Another form is live"})
         }
-        const update = await prisma.form.update({
-            where: {id : req.form.id},
+        const update = await prisma.form.updateMany({
+            where: {
+                id : formId.data,
+                userId: userId.data,
+            },
             data : {isLive : true},
         })
         return res.status(200).json({message : "Form is live now"});
@@ -325,7 +337,7 @@ const deleteForm = async(req,res)=>{
     }
     const {id} = formId.data;
 
-    const userId = validUuid.safeParse(req.cookies.user.id );
+    const userId = validUuid.safeParse(req.user.id );
     if(!userId.success){
         return res.status(400).json({message: formId.error.message});
     }

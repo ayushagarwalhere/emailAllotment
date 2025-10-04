@@ -60,7 +60,7 @@ const CreateForm = () => {
     };
 
     try {
-      const res = await axios.post("/api/forms", payload);
+      const res = await axios.post("http://localhost:5000/admin/forms", payload);
       alert("Form created successfully!");
       setFormName("");
       console.log(res);
@@ -81,6 +81,7 @@ const CreateForm = () => {
           type="text"
           placeholder="Form Name"
           value={formName}
+          required
           onChange={(e) => setFormName(e.target.value)}
           className="w-full border border-gray-300 rounded p-2 mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
