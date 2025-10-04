@@ -73,9 +73,9 @@ export const login = async (req, res) => {
   }
   const { email, password } = isValid.data;
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: { email, emailVerified: true },
-      select: { id },
+      select: { id: true, password: true },
     });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -126,42 +126,20 @@ export const sendOTP = async (user) => {
   }
 };
 
-export const verifyOTP = async (req, res) => {
-  const verifyOTP = verifyOtpschema.safeParse(req.body);
-  if (!verifyOTP.success) {
-    return res.status(400).json({ error: verifyOTP.error.issues[0].message });
-  }
-  const userId = validUuid.safeParse(req.params.id);
-  if (!id.success) {
-    return res.status(401).json({ error: id.message });
-  }
-  const { id } = userId.data;
-  const { otp } = verifyOTP.data;
-  const isValid = await verifyOTP_func(id, otp);
-  if (!isValid) {
-    return res.status(401).json({ error: "Invalid or expired OTP" });
-  }
-  try {
-    const user = await prisma.user.update({
-      where: {
-        email,
-      },
-      update: {
-        emailVerified: true,
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-      },
-    });
-    const { accessToken, refreshToken } = generateTokens(user);
-    await storeRefreshToken(user.id, refreshToken);
-    setAccessTokenCookie(res, accessToken);
-    setRefreshTokenCookie(res, refreshToken);
-    res.status(200).json({ message: "OTP verified", user, accessToken });
-  } catch (error) {
-    console.error("OTP verification error:", error);
-    res.status(500).json({ error: error.message });
-  }
-};
+const otpValidation = verifyOtpschema.safeParse(req.body);
+if (!otpValidation.success) {
+  return res.status(400).json({ error: otpValidation.error.issues[0].message });
+}
+const userIdValidation = validUuid.safeParse(req.params.id);
+if (!userIdValidation.success) {
+  return res.status(401).json({ error: userIdValidation.error.message });
+}
+const { id } = userIdValidation.data;
+const { otp } = otpValidation.data;
+
+const user = await prisma.user.update({
+  where: { id },
+  data: { emailVerified: true },
+  select: { id: true, email: true, role: true },
+});
+
