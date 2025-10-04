@@ -226,37 +226,6 @@ const allotEmail = async(req,res)=>{
 
 //Form-route controllers
 
-// const createForm = async(req,res)=>{
-// const {formName, questions} = req.body;
-//     if(!formName){
-//         return res.status(400).json({message : "FormName is required"});
-//     }
-
-//     const userId = validUuid.safeParse(req.cookies.user.id);
-//     if(!userId.success){
-//         return res.status(400).json({message : questionId.error.message});
-//     }
-//     const {id} = userId.data;
-//     try {
-//         const form = await prisma.form.create({
-//             data:{ 
-//                 formName,
-//                 user : {connect : {id}},
-                
-//             }
-//         })
-//         res.cookie("form", form.id,{
-//             httpOnly: true,
-//             secure: true,
-//             sameSite: "strict"
-//         });
-//         return res.status(201).json({message : "Form created successfully"});
-//     } catch (err) {
-//         console.error("An error occured", err);
-//         return res.status(500).json({message : "Failed to create form"});
-//     }
-// }
-
 export const createForm = async (req, res) => {
   try {
     const { formName, questions } = req.body;
@@ -404,4 +373,4 @@ const getForm = async(req,res)=>{
     }
 }
 
-export {getUser, approveUser, allotEmail, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm};
+export {getUser, approveUser, allotEmail, publishForm, deleteForm, getAllForms, getForm};

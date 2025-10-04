@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 const router = Router();
-import {getUser, approveUser, allotEmail, addQuestion, editQuestions, deleteQuestion, createForm, publishForm, deleteForm, getAllForms, getForm } from '../controllers/adminControls.js'
+import {getUser, approveUser, allotEmail, createForm, publishForm, deleteForm, getAllForms, getForm } from '../controllers/adminControls.js'
 import IsAdmin from '../middlewares/isAdmin.js';
 import { isLoggedIn } from "../middlewares/isLoggedIn.js";
 
@@ -13,9 +13,9 @@ router.post('/allotEmail/:id', isLoggedIn, IsAdmin, allotEmail);
 // router.get('/rejectedUsers', isLoggedIn, IsAdmin, getRejectedUsers);
 
 //Question routes
-router.post('/addQuestion', isLoggedIn, IsAdmin, addQuestion);
-router.put('/editQuestion/:id', isLoggedIn, IsAdmin, editQuestions);
-router.delete('/deleteQuestion/:id', isLoggedIn, IsAdmin, deleteQuestion);
+// router.post('/addQuestion', isLoggedIn, IsAdmin, addQuestion);
+// router.put('/editQuestion/:id', isLoggedIn, IsAdmin, editQuestions);
+// router.delete('/deleteQuestion/:id', isLoggedIn, IsAdmin, deleteQuestion);
 
 //Form routes
 router.post('/createForm', isLoggedIn, IsAdmin, createForm);
