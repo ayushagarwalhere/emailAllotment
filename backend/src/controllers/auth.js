@@ -5,16 +5,19 @@ import {
   signinschema,
   signupschema,
   verifyOtpschema,
-  sendOTPschema,
 } from "../zod-schema/auth.js";
 // import { sendEmails } from "../queues/emailQueue.js";
-import { setAccessTokenCookie, setRefreshTokenCookie, storeRefreshToken, generateTokens, verifyOTP_func } from "../utils/auth.js";
-import { RoleType } from "@prisma/client";
-import sendMail from "../utils/sendEmail.js";
+import {
+  generateTokens,
+  setAccessTokenCookie,
+  setRefreshTokenCookie,
+  storeRefreshToken,
+  verifyOTP_func,
+} from "../utils/auth.js";
+import { sendEmail } from "../utils/sendEmail.js";
 import { validUuid } from "../zod-schema/form.js";
 
-const OTP_EXPIRATION = process.env.OTP_EXPIRATION|| 300; //in ms
-
+const OTP_EXPIRATION = process.env.OTP_EXPIRATION || 300; //in ms
 
 // Signup handler
 export const signup = async (req, res) => {
@@ -22,7 +25,8 @@ export const signup = async (req, res) => {
   if (!isValid.success) {
     return res.status(400).json({ error: isValid.error.issues[0].message });
   }
-  const { name, middleName, lastName, email, password, rollNumber, branch } = isValid.data;
+  const { name, middleName, lastName, email, password, rollNumber, branch } =
+    isValid.data;
 
   const hashPassword = await bcrypt.hash(password, 10);
   try {
@@ -41,25 +45,25 @@ export const signup = async (req, res) => {
         branch: branch,
         emailVerified: false,
         role: {
-          connect: { role: "STUDENT" }  // must match Role.role enum value
-        }
+          connect: { role: "STUDENT" }, // must match Role.role enum value
+        },
       },
-      select:{
-        id:true,
-        email:true
-      }
+      select: {
+        id: true,
+        email: true,
+      },
     });
     console.log(user);
     await sendOTP(user);
-    res
-      .status(200)
-      .json({ message: "OTP sent to your email for signup verification.", id: user.id });
+    res.status(200).json({
+      message: "OTP sent to your email for signup verification.",
+      id: user.id,
+    });
   } catch (error) {
     console.error("Signup error:", error);
     res.status(500).json({ error: error.message });
   }
 };
-
 
 // Login handler
 export const login = async (req, res) => {
@@ -71,7 +75,7 @@ export const login = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { email, emailVerified: true },
-      select:{id}
+      select: { id },
     });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -82,16 +86,17 @@ export const login = async (req, res) => {
     }
     console.log(user.id);
     await sendOTP(user.id);
-    return res.status(200).json({ message: "Password verified OTP verification left" });
+    return res
+      .status(200)
+      .json({ message: "Password verified OTP verification left" });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-
 export const sendOTP = async (user) => {
-  const {email, id} = user;
+  const { email, id } = user;
   try {
     const { hashedOTP, otp } = await generateOtp();
     console.log(otp);
@@ -99,64 +104,64 @@ export const sendOTP = async (user) => {
 
     const mail = {
       toWhom: email,
-      subject: 'Your OTP for Login',
+      subject: "Your OTP for Login",
       msg: {
-        title: 'Login OTP',
+        title: "Login OTP",
         message: `Your OTP is ${otp}. It is valid for ${OTP_EXPIRATION / 60} minutes.`,
       },
     };
-    const info = await sendMail(mail.toWhom, mail.subject, mail.msg);
+    const info = await sendEmail(mail.toWhom, mail.subject, mail.msg);
 
-    console.log(`OTP email sent successfully to ${email}. Message ID: ${info.messageId}`);
+    console.log(
+      `OTP email sent successfully to ${email}. Message ID: ${info.messageId}`,
+    );
 
     return {
       otp,
-      message: 'OTP sent successfully',
+      message: "OTP sent successfully",
     };
   } catch (error) {
-    console.error('Error sending OTP:', error);
-    throw new Error('Failed to send OTP');
+    console.error("Error sending OTP:", error);
+    throw new Error("Failed to send OTP");
   }
 };
 
-export const verifyOTP = async(req, res)=>{
+export const verifyOTP = async (req, res) => {
   const verifyOTP = verifyOtpschema.safeParse(req.body);
-  if(!verifyOTP.success){
-    return res.status(400).json({error: verifyOTP.error.issues[0].message});
+  if (!verifyOTP.success) {
+    return res.status(400).json({ error: verifyOTP.error.issues[0].message });
   }
   const userId = validUuid.safeParse(req.params.id);
-  if(!id.success){
-    return res.status(401).json({error: id.message});
+  if (!id.success) {
+    return res.status(401).json({ error: id.message });
   }
-  const {id} = userId.data;
-  const {otp} = verifyOTP.data;
+  const { id } = userId.data;
+  const { otp } = verifyOTP.data;
   const isValid = await verifyOTP_func(id, otp);
-  if(!isValid){
-    return res.status(401).json({error: "Invalid or expired OTP"});
+  if (!isValid) {
+    return res.status(401).json({ error: "Invalid or expired OTP" });
   }
   try {
     const user = await prisma.user.update({
-      where:{
+      where: {
         email,
       },
-      update:{
-        emailVerified : true,
+      update: {
+        emailVerified: true,
       },
-      select:{
+      select: {
         id: true,
         email: true,
         role: true,
-      }
-    })
-    const {accessToken, refreshToken} = generateTokens(user);
+      },
+    });
+    const { accessToken, refreshToken } = generateTokens(user);
     await storeRefreshToken(user.id, refreshToken);
     setAccessTokenCookie(res, accessToken);
     setRefreshTokenCookie(res, refreshToken);
-    res.status(200).json({message: "OTP verified", user, accessToken});
+    res.status(200).json({ message: "OTP verified", user, accessToken });
   } catch (error) {
     console.error("OTP verification error:", error);
-    res.status(500).json({error: error.message} ); 
+    res.status(500).json({ error: error.message });
   }
-}
-
-
+};
