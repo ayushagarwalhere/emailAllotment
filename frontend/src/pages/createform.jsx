@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import NavbarAdmin from "../components/navbarAdmin";
+import Navbar1 from "../components/navbarAdmin1";
 
 const CreateForm = () => {
   const [formName, setFormName] = useState("");
@@ -73,7 +74,7 @@ const CreateForm = () => {
 
   return (
     <>
-      <NavbarAdmin/>
+      <Navbar1/>
       <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded-lg mt-20">
         <h2 className="text-2xl font-bold mb-4">Create Form</h2>
 

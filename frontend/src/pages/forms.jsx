@@ -1,9 +1,9 @@
-import Navbar from "../components/Navbar";
+import Navbar1 from "../components/navbarAdmin1";
 
 function FormsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar1 />
 
       <main className="pt-20 px-6 sm:px-12">
         <section className="max-w-5xl mx-auto bg-white rounded-md shadow-sm p-8">

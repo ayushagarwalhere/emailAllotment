@@ -10,6 +10,8 @@ import SuperAdmin from "./pages/superAdmin";
 import VerifyOTP from "./pages/VerifyOTP";
 import GetAdmins from "./pages/getAdmins";
 import CreateAdmin from "./pages/createAdmin";
+import AdminPage from "./pages/admin";
+import FormsPage from "./pages/forms";
 
 function App() {
   return (
@@ -17,10 +19,15 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />}></Route>
         <Route path="/student/dashboard" element={<Dashboard />}></Route>
-  <Route path="/admin" element={<AdminPage />}></Route>
-    <Route path="/admin/forms" element={<FormsPage />}></Route>
+
+        {/* admin */}
+        <Route path="/admin" element={<AdminPage />}></Route>
+        <Route path="/admin/forms" element={<FormsPage />}></Route>
+        <Route path="/admin/createform" element={<CreateForm />}></Route>
         <Route path="admin/studentinfo" element={<StudentInfo />}></Route>
         <Route path="admin/getAdmin" element={<GetAdmins />}></Route>
+
+        {/* superadmin */}
         <Route path="/superadmin" element={<SuperAdmin />}></Route>
         <Route path="/superadmin/createAdmin" element={<CreateAdmin />}></Route>
         <Route path="/superadmin/viewadmin" element={<CreateAdmin />}></Route>

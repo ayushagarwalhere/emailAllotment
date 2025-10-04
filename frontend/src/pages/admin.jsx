@@ -1,3 +1,4 @@
+import Navbar1 from "../components/navbarAdmin1";
 import NavbarAdmin from "../components/navbarAdmin1";
 
 function AdminPage() {
@@ -5,7 +6,7 @@ function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavbarAdmin />
+      <Navbar1 />
 
       <main className="pt-20 px-6 sm:px-12">
         <section className="max-w-4xl mx-auto bg-white rounded-md shadow-sm p-8">

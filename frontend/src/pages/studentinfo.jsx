@@ -2,6 +2,7 @@ import NavbarAdmin from "../components/navbarAdmin";
 import StudentCard from "../components/studentcards";
 import { useState } from "react";
 import axios from "axios";
+import Navbar1 from "../components/navbarAdmin1";
 
 function StudentInfo(){
 
@@ -37,7 +38,7 @@ function StudentInfo(){
    
     return(
         <div className="min-h-screen overflow-hidden">
-            <NavbarAdmin></NavbarAdmin>
+            <Navbar1/>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 px-4 sm:px-8 mt-8">
            <div className="mt-4 mb-4 sm:mb-10 sm:ml-10 sm:mt-15"> 
               <h1 className=" font-bold text-2xl sm:text-3xl" >Students Requests</h1>

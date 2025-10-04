@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function Navbar() {
+function Navbar1() {
   return (
     <nav className=" text-black px-4 py-2.5 fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur">
       <div className="flex justify-between items-center gap-2 pr-8">
@@ -30,4 +30,4 @@ function Navbar() {
   );
 }
 
-export default Navbar;
+export default Navbar1;
